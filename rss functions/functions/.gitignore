@@ -1,0 +1,27 @@
+node_modules/
+*.local
+
+# Node modules
+node_modules/
+
+# Firebase configuration and environment files
+.firebase/
+.firebase.rc
+
+# Environment variables (do not commit these!)
+.env
+
+# If firebase.js and config.js contain secrets, ignore them and use sample files instead:
+firebase.js
+config.js
+
+# Log files
+*.log
+firebase-debug.log*
+
+# Build output (if any)
+dist/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
