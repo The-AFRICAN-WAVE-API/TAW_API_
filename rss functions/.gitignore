@@ -68,4 +68,22 @@ node_modules/
 # dataconnect generated files
 .dataconnect
 
-.package.json
+# Node modules
+node_modules/
+
+# Firebase configuration and environment files (if not managed by environment variables)
+.firebase/
+.firebase.rc
+.env
+
+# Log files
+*.log
+firebase-debug.log*
+
+# Build output (if using a build step, e.g., transpiling)
+dist/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
