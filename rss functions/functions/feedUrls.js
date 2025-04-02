@@ -23,7 +23,6 @@ module.exports = [
   "https://disruptafrica.com/feed/",
   "https://brittlepaper.com/feed/",
   "https://africacheck.org/feed",
-  "https://africanarguments.org/feed/",
   "https://www.dailymail.co.uk/articles.rss",
   "https://www.dailymail.co.uk/news/index.rss",
   "https://saharareporters.com/articles/rss-feed",
