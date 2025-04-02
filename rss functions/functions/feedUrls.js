@@ -7,7 +7,6 @@ module.exports = [
   "https://www.aljazeera.com/xml/rss/all.xml",
   "http://feeds.nbcnews.com/nbcnews/public/news",
   "https://www.cbsnews.com/latest/rss/main",
-  "https://abcnews.go.com/abcnews/topstories",
   "https://www.ft.com/?format=rss",
   "https://feeds.a.dj.com/rss/RSSMarketsMain.xml",
   "https://www.economist.com/the-world-this-week/rss.xml",
