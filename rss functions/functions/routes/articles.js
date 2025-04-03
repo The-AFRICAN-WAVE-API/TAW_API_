@@ -4,6 +4,7 @@ const express = require("express");
 const router = express.Router();
 
 const {fetchAndStoreRssFeeds} = require("../services/rssService");
+const { translateArticleInFrench, translateArticleInSpanish, translateArticleInGerman } = require("../services/translationService");
 
 // GET /rss - Process RSS feeds and store them
 router.get("/rss", async (req, res) => {
@@ -113,5 +114,41 @@ router.get("/related", async (req, res) => {
     res.status(500).json({error: "Failed to fetch related articles"});
   }
 });
+
+// GET /articles/french - Fetching article feed translated into french
+router.get("/articles/french", async (req, res) => {
+ try {
+   const frenchArticles = await translateArticleInFrench()
+   res.status(200)
+   return res.json(frenchArticles)
+ } catch (error) {
+    console.error("Error getting translated feed: ", error)
+    res.status(500).send("Something went wrong translating the feed")
+ }
+})
+
+// GET /articles/spanish - Fetching article feed translated into spanish
+router.get("/articles/spanish", async (req, res) => {
+  try {
+    const spanishArticles = await translateArticleInSpanish()
+    res.status(200)
+    return res.json(spanishArticles)
+  } catch (error) {
+     console.error("Error getting translated feed: ", error)
+     res.status(500).send("Something went wrong translating the feed")
+  }
+ })
+
+// GET /articles/german - Fetching article feed translated into german
+ router.get("/articles/german", async (req, res) => {
+  try {
+    const germanArticles = await translateArticleInGerman()
+    res.status(200)
+    return res.json(germanArticles)
+  } catch (error) {
+     console.error("Error getting translated feed: ", error)
+     res.status(500).send("Something went wrong translating the feed")
+  }
+ })
 
 module.exports = router;
