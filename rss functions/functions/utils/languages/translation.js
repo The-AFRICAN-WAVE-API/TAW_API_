@@ -20,8 +20,8 @@ export async function translateArticle(article, targetLanguage = 'en') {
         }
 
         const combinedText = JSON.stringify({
-            title: article.title,
-            content: article.content
+            title: article.title || "",
+            content: article.content || article.description || article.contentSnippet
         });
 
         try {
