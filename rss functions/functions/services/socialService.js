@@ -2,6 +2,7 @@
 const fetch = require("node-fetch");
 const {categorizeArticleRuleBased, analyzeSentiment, analyzeEntities} = require("../utils/analysis");
 const {getUniqueKey} = require("../utils/helpers");
+const detectLanguage = require("../utils/languages/languageDetection")
 const admin = require("../config/firebase");
 const db = admin.firestore();
 const config = require("../config/config");
@@ -114,6 +115,10 @@ async function processAndStoreSocialPosts() {
     } else if (entities.places && entities.places.length > 0) {
       geoLocation = entities.places[0];
     }
+
+    //Detect the original language of the the tweet
+    const sourceLanguage = detectLanguage(contentForAnalysis)
+
     const uniqueKey = getUniqueKey(post.id, post.text);
     console.log("Generated unique key for post:", uniqueKey);
     const docData = {
@@ -126,6 +131,7 @@ async function processAndStoreSocialPosts() {
       entities,
       location: geoLocation,
       description: contentForAnalysis,
+      language: sourceLanguage,
       imageUrl: post.imageUrl,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       publicMetrics: post.public_metrics,
