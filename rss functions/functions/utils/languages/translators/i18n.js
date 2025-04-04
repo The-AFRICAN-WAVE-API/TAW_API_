@@ -2,14 +2,14 @@ const i18next = require("i18next");
 /**
  * @fileoverview Module for i18next filesystem backend integration
  * @module i18next-fs-backend
- * 
+ *
  * @requires i18next-fs-backend
- * 
+ *
  * @description
  * Imports the Backend class from i18next-fs-backend module.
  * This is used for loading and parsing localization files from the filesystem
  * to be used with i18next internationalization framework.
- * 
+ *
  * @constant {Class} Backend - The filesystem backend class for i18next
  */
 const {Backend} = require("i18next-fs-backend");

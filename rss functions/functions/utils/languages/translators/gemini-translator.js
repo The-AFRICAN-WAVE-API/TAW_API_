@@ -25,14 +25,14 @@ const RATE_LIMIT = {
 /**
  * Translates a JSON string to a specified target language while maintaining the JSON structure using Gemini API.
  * Implements exponential backoff for rate limiting.
- * 
+ *
  * @async
  * @param {string} text - The JSON string to translate
  * @param {string} targetLanguage - The target language to translate to
- * @returns {Promise<string>} The translated JSON string
+ * @return {Promise<string>} The translated JSON string
  * @throws {Error} If the translation response contains invalid JSON
  * @throws {Error} If rate limit is exceeded after maximum retries
- * 
+ *
  * @example
  * const jsonText = '{"greeting": "Hello world"}';
  * const translated = await translate(jsonText, 'Spanish');

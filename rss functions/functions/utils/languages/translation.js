@@ -3,7 +3,7 @@ const {TranslationProvider} = require("./translationProvider");
 
 /**
  * Translates an article object's title and content to a target language.
- * 
+ *
  * @async
  * @param {Object} article - The article object to translate
  * @param {string} [article.title] - The title of the article
@@ -11,9 +11,9 @@ const {TranslationProvider} = require("./translationProvider");
  * @param {string} [article.description] - Fallback content if main content is missing
  * @param {string} [article.contentSnippet] - Alternative content if description is missing
  * @param {string} [targetLanguage="en"] - The ISO language code to translate to
- * @returns {Promise<Object>} The translated article object with updated title, content and language
+ * @return {Promise<Object>} The translated article object with updated title, content and language
  * @throws {Error} Throws any errors that occur during translation or parsing
- * 
+ *
  * @example
  * const article = {
  *   title: "Bonjour le monde",

@@ -5,12 +5,12 @@ const i18next = require("./translators/i18n.js");
  * A utility class for handling text translations.
  */
 class TranslationProvider {
-    /**
+  /**
      * Translates text to a target language using Gemini API with i18next fallback.
      * @async
      * @param {string} text - The text to be translated.
      * @param {string} targetLanguage - The target language code (e.g., 'en', 'fr', 'es').
-     * @returns {Promise<string>} The translated text. Returns original text if translation fails.
+     * @return {Promise<string>} The translated text. Returns original text if translation fails.
      * @throws {Error} If both translation methods fail.
      * @example
      * const translated = await TranslationProvider.translate('Hello', 'fr');

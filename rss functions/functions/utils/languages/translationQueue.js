@@ -23,7 +23,7 @@ let lastRateLimitHit = 0;
  * Queues an article for translation while handling rate limiting
  * @param {Object} article - The article object to be translated
  * @param {string} targetLanguage - The target language code for translation
- * @returns {Promise<Object|null>} Translated article object or null if rate limited/error occurs
+ * @return {Promise<Object|null>} Translated article object or null if rate limited/error occurs
  * @throws {Error} Translation service errors are caught and handled internally
  * @async
  */

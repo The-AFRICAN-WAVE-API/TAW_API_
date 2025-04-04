@@ -7,13 +7,13 @@ const DEFAULT_LIMIT = 10;
 /**
  * Translates RSS articles from the database into French.
  * @param {number} [LIMIT=DEFAULT_LIMIT] - Maximum number of articles to retrieve and translate.
- * @returns {Promise<Array<Object>|{message: string, count: number}>} Array of translated articles or error message object.
+ * @return {Promise<Array<Object>|{message: string, count: number}>} Array of translated articles or error message object.
  * @throws {Error} When translation fails.
- * 
+ *
  * @example
  * // Translate 10 articles
  * const frenchArticles = await translateArticleInFrench(10);
- * 
+ *
  * // Each article in the returned array contains:
  * // {
  * //   id: string,
@@ -45,13 +45,13 @@ async function translateArticleInFrench(LIMIT=DEFAULT_LIMIT) {
 /**
  * Translates RSS articles from the database into Spanish.
  * @param {number} [LIMIT=DEFAULT_LIMIT] - Maximum number of articles to retrieve and translate.
- * @returns {Promise<Array<Object>|{message: string, count: number}>} Array of translated articles or error message object.
+ * @return {Promise<Array<Object>|{message: string, count: number}>} Array of translated articles or error message object.
  * @throws {Error} When translation fails.
- * 
+ *
  * @example
  * // Translate 10 articles
  * const spanishArticles = await translateArticleInSpanish(10);
- * 
+ *
  * // Each article in the returned array contains:
  * // {
  * //   id: string,
@@ -83,13 +83,13 @@ async function translateArticleInSpanish(LIMIT=DEFAULT_LIMIT) {
 /**
  * Translates RSS articles from the database into German.
  * @param {number} [LIMIT=DEFAULT_LIMIT] - Maximum number of articles to retrieve and translate.
- * @returns {Promise<Array<Object>|{message: string, count: number}>} Array of translated articles or error message object.
+ * @return {Promise<Array<Object>|{message: string, count: number}>} Array of translated articles or error message object.
  * @throws {Error} When translation fails.
- * 
+ *
  * @example
  * // Translate 10 articles
  * const germanArticles = await translateArticleInGerman(10);
- * 
+ *
  * // Each article in the returned array contains:
  * // {
  * //   id: string,

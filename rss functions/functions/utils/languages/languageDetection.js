@@ -3,15 +3,15 @@ const franc = require("franc-min");
 /**
  * Detects the language of the provided text using the franc library.
  * Supports English (en), French (fr), German (de), and Spanish (es).
- * 
+ *
  * @param {string} text - The text to analyze for language detection
- * @returns {string} The ISO 639-1 language code ('en', 'fr', 'de', 'es'). 
+ * @return {string} The ISO 639-1 language code ('en', 'fr', 'de', 'es').
  *                   Returns 'en' as default if:
  *                   - Input is invalid/empty
  *                   - Language detection fails
  *                   - Detected language is not supported
  * @throws {Error} Logs error to console if language detection fails
- * 
+ *
  * @example
  * detectLanguage('Hello world'); // returns 'en'
  * detectLanguage('Bonjour le monde'); // returns 'fr'
