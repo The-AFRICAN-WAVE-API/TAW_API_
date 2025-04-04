@@ -3,7 +3,7 @@ const db = admin.firestore();
 const queueTranslation = require("../utils/languages/translationQueue").queueTranslation;
 
 const DEFAULT_LIMIT = 10;
-export async function translateArticleInFrench(LIMIT=DEFAULT_LIMIT) {
+async function translateArticleInFrench(LIMIT=DEFAULT_LIMIT) {
     try {
         const snapshot = await db.collection("rss_articles").get(LIMIT);
         if (snapshot.empty) {
@@ -25,7 +25,7 @@ export async function translateArticleInFrench(LIMIT=DEFAULT_LIMIT) {
     }
 }
 
-export async function translateArticleInSpanish(LIMIT=DEFAULT_LIMIT) {
+async function translateArticleInSpanish(LIMIT=DEFAULT_LIMIT) {
     try {
         const snapshot = await db.collection("rss_articles").get(LIMIT);
         if (snapshot.empty) {
@@ -47,7 +47,7 @@ export async function translateArticleInSpanish(LIMIT=DEFAULT_LIMIT) {
     }
 }
 
-export async function translateArticleInGerman(LIMIT=DEFAULT_LIMIT) {
+async function translateArticleInGerman(LIMIT=DEFAULT_LIMIT) {
     try {
         const snapshot = await db.collection("rss_articles").get(LIMIT);
         if (snapshot.empty) {
