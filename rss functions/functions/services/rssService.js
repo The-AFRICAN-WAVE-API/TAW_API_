@@ -4,6 +4,7 @@ const feedUrls = require("../feedUrls");
 const {categorizeArticleRuleBased, analyzeSentiment, analyzeEntities} = require("../utils/analysis");
 const {getUniqueKey} = require("../utils/helpers");
 const admin = require("../config/firebase");
+const {langageDetection} = require("../utils/languageDetection");
 const db = admin.firestore();
 
 /**
@@ -43,6 +44,9 @@ async function fetchAndStoreRssFeeds() {
           if (item.enclosure && item.enclosure.url) {
             imageUrl = item.enclosure.url;
           }
+
+          // Language detection and translation (if needed)
+          const detectedLanguage = await langageDetection(contentForAnalysis);
           // Duplicate checking: using the unique key as the Firestore doc ID prevents duplicate entries.
           const uniqueKey = getUniqueKey(item.title, item.link);
           return {
@@ -57,6 +61,7 @@ async function fetchAndStoreRssFeeds() {
               entities,
               location: geoLocation,
               description: contentForAnalysis,
+              langage: detectedLanguage,
               imageUrl,
               createdAt: admin.firestore.FieldValue.serverTimestamp(),
             },

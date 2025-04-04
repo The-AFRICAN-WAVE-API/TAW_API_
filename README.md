@@ -1,8 +1,6 @@
 # TAW_API
 
-
-
-# RSS & Social Feed Aggregator
+## RSS & Social Feed Aggregator
 
 This project is a serverless RSS and social media feed aggregator built with Firebase Cloud Functions. It fetches RSS feeds from multiple sources, analyzes content (e.g., categorization, sentiment, entity extraction), checks for duplicate items, and stores them in Firestore. In addition, it fetches popular social media posts (e.g., from Twitter) using the Twitter API.
 
@@ -34,7 +32,7 @@ This project is a serverless RSS and social media feed aggregator built with Fir
 
 ## Folder Structure
 
-```
+```text
 functions/
 ├── config/
 │   └── config.js             # Global configuration (API keys, concurrency limits, etc.)
@@ -97,7 +95,7 @@ This command will deploy your Cloud Functions and update Firestore rules if nece
 
 Once deployed, your functions are available at your Firebase project’s URL. For example, if your function URL is:
 
-```
+```cURL
 https://us-central1-your-project.cloudfunctions.net/api
 ```
 
@@ -144,4 +142,3 @@ Contributions are welcome! Please open an issue or submit a pull request with yo
 [MIT License](LICENSE)
 
 ---
-
