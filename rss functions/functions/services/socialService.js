@@ -8,83 +8,80 @@ const db = admin.firestore();
 const config = require("../config/config");
 
 /**
- * Fetches popular social media posts (Twitter example),
- * excludes retweets, requests media expansions, and extracts image URLs.
- * @return {Promise<Object[]>} Array of social media post objects.
+ * Fetches popular social media posts based on popular hashtags.
+ * Excludes retweets, requests media expansions, and extracts image URLs.
+ * @return {Promise<Object[]>} A promise that resolves to an array of social media post objects.
  */
 async function fetchPopularSocialPosts() {
-  const celebrityUsernames = [
-    "elonmusk",
-    "barackobama",
-    "kimkardashian",
-    "cristiano",
-    "beyonce",
+  // Define an array of popular hashtags (without the '#' symbol)
+  const popularHashtags = [
+    "news",
+    "tech",
+    "sports",
+    "entertainment",
+    "politics",
   ];
 
-  // For each celebrity, fetch tweets separately
-  const tweetsByUser = await Promise.all(
-      celebrityUsernames.map(async (username) => {
-        const url = `https://api.twitter.com/2/tweets/search/recent?query=from:${username} -is:retweet&tweet.fields=public_metrics,entities,attachments&expansions=attachments.media_keys&media.fields=url`;
-        const options = {
-          headers: {
-            "Authorization": `Bearer ${config.TWITTER_BEARER_TOKEN}`,
-          },
-        };
+  // Construct the query string: e.g. "#news OR #tech OR #sports OR #entertainment OR #politics"
+  const query = popularHashtags
+      .map((tag) => `#${tag}`)
+      .join(" OR ");
 
-        try {
-          const response = await fetch(url, options);
-          const data = await response.json();
-          console.log(`Twitter API response for ${username}:`, data);
+  console.log("Constructed hashtag query:", query);
 
-          // Check if usage cap is exceeded for this user
-          if (data.title === "UsageCapExceeded") {
-            console.error(`Usage cap exceeded for ${username}`);
-            return [];
-          }
+  const url = `https://api.twitter.com/2/tweets/search/recent?query=${encodeURIComponent(query)}&tweet.fields=public_metrics,entities,attachments&expansions=attachments.media_keys&media.fields=url`;
+  const options = {
+    headers: {
+      "Authorization": `Bearer ${config.TWITTER_BEARER_TOKEN}`,
+    },
+  };
 
-          // Build a media map for tweets with media
-          const mediaMap = {};
-          if (data.includes && data.includes.media) {
-            for (const media of data.includes.media) {
-              mediaMap[media.media_key] = media.url;
+  try {
+    const response = await fetch(url, options);
+    const data = await response.json();
+    console.log("Twitter API response for hashtags:", data);
+
+    // Check if the API reports a usage cap or error
+    if (data.title === "UsageCapExceeded") {
+      console.error("Usage cap exceeded for hashtag query");
+      return [];
+    }
+
+    // Build a media map from media_key to media URL (if available)
+    const mediaMap = {};
+    if (data.includes && data.includes.media) {
+      for (const media of data.includes.media) {
+        mediaMap[media.media_key] = media.url;
+      }
+    }
+
+    if (data && Array.isArray(data.data)) {
+      const tweets = data.data
+          .map((tweet) => {
+            if (tweet.attachments && tweet.attachments.media_keys && tweet.attachments.media_keys.length > 0) {
+              tweet.imageUrl = mediaMap[tweet.attachments.media_keys[0]] || null;
+            } else {
+              tweet.imageUrl = null;
             }
-          }
-
-          if (data && Array.isArray(data.data)) {
-            const tweets = data.data
-                .map((tweet) => {
-                  if (tweet.attachments && tweet.attachments.media_keys && tweet.attachments.media_keys.length > 0) {
-                    tweet.imageUrl = mediaMap[tweet.attachments.media_keys[0]] || null;
-                  } else {
-                    tweet.imageUrl = null;
-                  }
-                  return tweet;
-                })
-                .filter((tweet) => {
-                  const metrics = tweet.public_metrics || {};
-                  const popularByRetweets = metrics.retweet_count && metrics.retweet_count > 5;
-                  const popularByLikes = metrics.like_count && metrics.like_count > 50;
-                  const hasEntities = tweet.entities && Object.keys(tweet.entities).length > 0;
-                  return popularByRetweets || popularByLikes || hasEntities;
-                });
-            return tweets;
-          } else {
-            console.error(`Unexpected response format for ${username}:`, data);
-            return [];
-          }
-        } catch (err) {
-          console.error(`Error fetching tweets for ${username}:`, err.message);
-          return [];
-        }
-      }),
-  );
-
-  // Flatten the results from each user into a single array
-  const aggregatedTweets = tweetsByUser.flat();
-  console.log("Total aggregated tweets:", aggregatedTweets.length);
-  return aggregatedTweets;
+            return tweet;
+          })
+          .filter((tweet) => {
+            const metrics = tweet.public_metrics || {};
+            const popularByRetweets = metrics.retweet_count && metrics.retweet_count > 5;
+            const popularByLikes = metrics.like_count && metrics.like_count > 50;
+            const hasEntities = tweet.entities && Object.keys(tweet.entities).length > 0;
+            return popularByRetweets || popularByLikes || hasEntities;
+          });
+      return tweets;
+    } else {
+      console.error("Unexpected response format:", data);
+      return [];
+    }
+  } catch (err) {
+    console.error("Error fetching social media posts:", err.message);
+    return [];
+  }
 }
-
 
 /**
  * Processes and stores fetched social posts in Firestore.
@@ -96,6 +93,7 @@ async function processAndStoreSocialPosts() {
   let batch = db.batch();
   const MAX_BATCH_SIZE = 500;
   let operationCount = 0;
+
   for (const post of posts) {
     const contentForAnalysis = post.text || "";
     const category = categorizeArticleRuleBased(contentForAnalysis);
