@@ -1,11 +1,11 @@
 // services/socialService.js
-const fetch = require("node-fetch");
-const {categorizeArticleRuleBased, analyzeSentiment, analyzeEntities} = require("../utils/analysis");
-const {getUniqueKey} = require("../utils/helpers");
-const detectLanguage = require("../utils/languages/languageDetection");
-const admin = require("../config/firebase");
+import fetch from "node-fetch";
+import { categorizeArticleRuleBased, analyzeSentiment, analyzeEntities } from "../utils/analysis.js";
+import { getUniqueKey } from "../utils/helpers.js";
+import { detectLanguage } from '../utils/languages/languageDetection.js';
+import admin from "../config/firebase.js";
 const db = admin.firestore();
-const config = require("../config/config");
+import config from "../config/config.js";
 
 /**
  * Fetches popular social media posts based on popular hashtags.

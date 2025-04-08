@@ -1,5 +1,5 @@
-const {translate: geminiTranslate} = require("./translators/gemini-translator.js");
-const i18next = require("./translators/i18n.js");
+import { translate as geminiTranslate } from "./translators/gemini-translator.js";
+import i18next from "./translators/i18n.js";
 
 /**
  * A utility class for handling text translations.
@@ -35,4 +35,4 @@ class TranslationProvider {
   }
 }
 
-module.exports = TranslationProvider;
+export default TranslationProvider;

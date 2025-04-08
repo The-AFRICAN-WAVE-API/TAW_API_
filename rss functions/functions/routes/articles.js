@@ -1,10 +1,10 @@
 // routes/articles.js
-const express = require("express");
+import { Router } from "express";
 // eslint-disable-next-line new-cap
-const router = express.Router();
+const router = Router();
 
-const {fetchAndStoreRssFeeds} = require("../services/rssService");
-const {translateArticleInFrench, translateArticleInSpanish, translateArticleInGerman} = require("../services/translationService");
+import { fetchAndStoreRssFeeds } from "../services/rssService";
+import { translateArticleInFrench, translateArticleInSpanish, translateArticleInGerman } from "../services/translationService";
 
 // GET /rss - Process RSS feeds and store them
 router.get("/rss", async (req, res) => {
@@ -151,4 +151,4 @@ router.get("/articles/german", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

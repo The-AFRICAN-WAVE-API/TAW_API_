@@ -1,6 +1,6 @@
-const admin = require("firebase-admin");
-const db = admin.firestore();
-const queueTranslation = require("../utils/languages/translationQueue").queueTranslation;
+import { firestore } from "firebase-admin";
+const db = firestore();
+import { queueTranslation } from "../utils/languages/translationQueue";
 
 const DEFAULT_LIMIT = 10;
 
@@ -111,7 +111,7 @@ async function translateArticleInGerman(LIMIT=DEFAULT_LIMIT) {
   }
 }
 
-module.exports = {
+export default {
   translateArticleInFrench,
   translateArticleInSpanish,
   translateArticleInGerman,

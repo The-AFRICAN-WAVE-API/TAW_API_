@@ -1,4 +1,4 @@
-const i18next = require("i18next");
+import i18next, { use } from "i18next";
 /**
  * @fileoverview Module for i18next filesystem backend integration
  * @module i18next-fs-backend
@@ -12,10 +12,9 @@ const i18next = require("i18next");
  *
  * @constant {Class} Backend - The filesystem backend class for i18next
  */
-const {Backend} = require("i18next-fs-backend");
+import { Backend } from "i18next-fs-backend";
 
-i18next
-    .use(Backend)
+use(Backend)
     .init({
       backend: {
         loadPath: "locales/{{lng}}/translation.json",
@@ -40,4 +39,4 @@ i18next
     },
     );
 
-module.exports = i18next;
+export default i18next;

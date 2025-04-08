@@ -1,5 +1,5 @@
-const {detectLanguage} = require("./detectLanguage");
-const {TranslationProvider} = require("./translationProvider");
+import { detectLanguage } from "./detectLanguage";
+import { TranslationProvider } from "./translationProvider";
 
 /**
  * Translates an article object's title and content to a target language.
@@ -59,6 +59,6 @@ async function translateArticle(article, targetLanguage = "en") {
   }
 }
 
-module.exports = {
+export default {
   translateArticle,
 };

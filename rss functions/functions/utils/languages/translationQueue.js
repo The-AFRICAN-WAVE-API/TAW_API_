@@ -1,5 +1,5 @@
-const PQueue = require("p-queue");
-const {translateArticle} = require("./translation");
+import PQueue from "p-queue";
+import { translateArticle } from "./translation";
 
 const queue = new PQueue({
   concurrency: 2, // Number of concurrent translations
@@ -48,4 +48,4 @@ async function queueTranslation(article, targetLanguage) {
   });
 }
 
-module.exports = {queueTranslation};
+export default {queueTranslation};

@@ -1,10 +1,10 @@
 // services/rssService.js
-const {throttleRequests} = require("../utils/throttle");
-const feedUrls = require("../feedUrls");
-const {categorizeArticleRuleBased, analyzeSentiment, analyzeEntities} = require("../utils/analysis");
-const {getUniqueKey} = require("../utils/helpers");
-const admin = require("../config/firebase");
-const {langageDetection} = require("../utils/languageDetection");
+import {throttleRequests} from "../utils/throttle.js";
+import feedUrls from "../feedUrls.js";
+import {categorizeArticleRuleBased, analyzeSentiment, analyzeEntities} from "../utils/analysis.js";
+import {getUniqueKey} from "../utils/helpers.js";
+import admin from "../config/firebase.js";
+import {detectLanguage} from '../utils/languages/languageDetection.js';
 const db = admin.firestore();
 
 /**
@@ -46,7 +46,7 @@ async function fetchAndStoreRssFeeds() {
           }
 
           // Language detection and translation (if needed)
-          const detectedLanguage = await langageDetection(contentForAnalysis);
+          const detectedLanguage = await detectLanguage(contentForAnalysis);
           // Duplicate checking: using the unique key as the Firestore doc ID prevents duplicate entries.
           const uniqueKey = getUniqueKey(item.title, item.link);
           return {

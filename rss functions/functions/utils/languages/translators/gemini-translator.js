@@ -1,5 +1,5 @@
-const {GoogleGenAI} = require("google-genai");
-const {GEMINI_API_KEY} = require("../../config/config.js");
+import { GoogleGenAI } from "google-genai";
+import { GEMINI_API_KEY } from "../../config/config.js";
 
 const genai = new GoogleGenAI({
   apiKey: GEMINI_API_KEY,
@@ -83,6 +83,6 @@ async function translate(text, targetLanguage) {
   }
 }
 
-module.exports = {
+export default {
   translate,
 };

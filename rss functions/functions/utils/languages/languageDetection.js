@@ -1,4 +1,4 @@
-const franc = require("franc-min");
+import franc from "franc";
 
 /**
  * Detects the language of the provided text using the franc library.

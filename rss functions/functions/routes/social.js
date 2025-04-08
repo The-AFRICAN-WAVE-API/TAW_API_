@@ -1,9 +1,9 @@
 // routes/social.js
-const express = require("express");
+import { Router } from "express";
 // eslint-disable-next-line new-cap
-const router = express.Router();
+const router = Router();
 
-const {processAndStoreSocialPosts} = require("../services/socialService");
+import { processAndStoreSocialPosts } from "../services/socialService";
 
 // GET /social - Process and store social media posts
 router.get("/social", async (req, res) => {
@@ -31,4 +31,4 @@ router.get("/socialpost", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;
