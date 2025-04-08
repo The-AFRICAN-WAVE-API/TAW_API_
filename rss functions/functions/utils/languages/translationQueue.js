@@ -1,5 +1,5 @@
 import PQueue from 'p-queue';
-import { translateArticle } from './translation';
+import { translateArticle } from './translation.js'; // Import the translation function
 
 const queue = new PQueue({
   concurrency: 2, // Number of concurrent translations
@@ -27,7 +27,7 @@ let lastRateLimitHit = 0;
  * @throws {Error} Translation service errors are caught and handled internally
  * @async
  */
-async function queueTranslation(article, targetLanguage) {
+export async function queueTranslation(article, targetLanguage) {
   return queue.add(async () => {
     try {
       if (Date.now() - lastRateLimitHit < COOLDOWN_PERIOD) {
@@ -48,4 +48,3 @@ async function queueTranslation(article, targetLanguage) {
   });
 }
 
-export default {queueTranslation};

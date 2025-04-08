@@ -7,8 +7,6 @@ import { createHash } from 'crypto';
  * @param {string} link - The article link.
  * @return {string} The unique key.
  */
-function getUniqueKey(title, link) {
+export function getUniqueKey(title, link) {
   return createHash('sha256').update(title + link).digest('hex');
 }
-
-export default {getUniqueKey};

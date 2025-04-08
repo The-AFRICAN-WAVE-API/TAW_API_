@@ -1,4 +1,4 @@
-import franc from 'franc';
+import {franc} from 'franc-min';
 
 /**
  * Detects the language of the provided text using the franc library.

@@ -1,7 +1,7 @@
 // utils/throttle.js
 import Parser from 'rss-parser';
 const parser = new Parser();
-import { CACHE_TTL } from '../config/config';
+import config from '../config/config.js';
 
 // In-memory cache for feeds
 const feedCache = {};
@@ -18,7 +18,7 @@ const feedCache = {};
 async function fetchFeedWithRetry(url, retries = 3, initialDelay = 1000, requestTimeout = 10000) {
   // Check cache
   const cached = feedCache[url];
-  if (cached && (Date.now() - cached.timestamp) < CACHE_TTL) {
+  if (cached && (Date.now() - cached.timestamp) < config.CACHE_TTL) {
     console.log(`Cache hit for ${url}`);
     return cached.feed;
   }
@@ -73,4 +73,4 @@ async function throttleRequests(urls, concurrency = 10) {
   return (await Promise.all(results)).filter(Boolean);
 }
 
-export default {fetchFeedWithRetry, throttleRequests};
+export {fetchFeedWithRetry, throttleRequests};

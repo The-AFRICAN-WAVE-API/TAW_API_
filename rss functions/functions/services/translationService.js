@@ -1,6 +1,6 @@
-import { firestore } from 'firebase-admin';
-const db = firestore();
-import { queueTranslation } from '../utils/languages/translationQueue';
+import admin from 'firebase-admin';
+const db = admin.firestore();
+import { queueTranslation } from '../utils/languages/translationQueue.js';
 
 const DEFAULT_LIMIT = 10;
 
@@ -19,7 +19,7 @@ const DEFAULT_LIMIT = 10;
  *   console.error(error);
  * }
  */
-async function translateArticleInFrench(LIMIT=DEFAULT_LIMIT) {
+export async function translateArticleInFrench(LIMIT=DEFAULT_LIMIT) {
   try {
     const snapshot = await db.collection('rss_articles').get(LIMIT);
     if (snapshot.empty) {
@@ -54,7 +54,7 @@ async function translateArticleInFrench(LIMIT=DEFAULT_LIMIT) {
  *   console.error(error);
  * }
  */
-async function translateArticleInSpanish(LIMIT=DEFAULT_LIMIT) {
+export async function translateArticleInSpanish(LIMIT=DEFAULT_LIMIT) {
   try {
     const snapshot = await db.collection('rss_articles').get(LIMIT);
     if (snapshot.empty) {
@@ -90,7 +90,7 @@ async function translateArticleInSpanish(LIMIT=DEFAULT_LIMIT) {
  *   console.error(error);
  * }
  */
-async function translateArticleInGerman(LIMIT=DEFAULT_LIMIT) {
+export async function translateArticleInGerman(LIMIT=DEFAULT_LIMIT) {
   try {
     const snapshot = await db.collection('rss_articles').get(LIMIT);
     if (snapshot.empty) {
@@ -111,8 +111,3 @@ async function translateArticleInGerman(LIMIT=DEFAULT_LIMIT) {
   }
 }
 
-export default {
-  translateArticleInFrench,
-  translateArticleInSpanish,
-  translateArticleInGerman,
-};

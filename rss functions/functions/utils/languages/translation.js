@@ -1,5 +1,5 @@
-import { detectLanguage } from './detectLanguage';
-import { TranslationProvider } from './translationProvider';
+import { detectLanguage } from './languageDetection.js';
+import TranslationProvider  from './translationProvider.js';
 
 /**
  * Translates an article object's title and content to a target language.
@@ -21,7 +21,7 @@ import { TranslationProvider } from './translationProvider';
  * };
  * const translatedArticle = await translateArticle(article, "en");
  */
-async function translateArticle(article, targetLanguage = 'en') {
+export async function translateArticle(article, targetLanguage = 'en') {
   // Ensure we have valid string content to analyze
   const textToAnalyze = (article.content || article.title || '').toString();
 
@@ -59,6 +59,3 @@ async function translateArticle(article, targetLanguage = 'en') {
   }
 }
 
-export default {
-  translateArticle,
-};

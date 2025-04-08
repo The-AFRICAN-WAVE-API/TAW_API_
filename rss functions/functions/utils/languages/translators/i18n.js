@@ -12,7 +12,7 @@ import i18next, { use } from 'i18next';
  *
  * @constant {Class} Backend - The filesystem backend class for i18next
  */
-import { Backend } from 'i18next-fs-backend';
+import Backend from 'i18next-fs-backend';
 
 use(Backend)
   .init({

@@ -5,8 +5,8 @@ import cors from 'cors';
 import compression from 'compression';
 
 // Import route modules
-import articlesRoutes from './routes/articles';
-import socialRoutes from './routes/social';
+import articlesRoutes from './routes/articles.js';
+import socialRoutes from './routes/social.js';
 
 const app = express();
 app.use(cors({origin: '*'}));

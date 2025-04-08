@@ -1,14 +1,14 @@
 // utils/analysis.js
 import nlp from 'compromise';
-import { positive, negative } from '../sentimentKeywords';
-import categoryKeywords from '../categoryKeywords';
+import { positive, negative } from '../sentimentKeywords.js';
+import categoryKeywords from '../categoryKeywords.js';
 
 /**
  * Categorizes content based on rule-based keyword matching.
  * @param {string} content - The text to categorize.
  * @return {string} The assigned category.
  */
-function categorizeArticleRuleBased(content) {
+ export function categorizeArticleRuleBased(content) {
   const lowerContent = content.toLowerCase();
   let maxScore = 0;
   let assignedCategory = 'Other';
@@ -30,7 +30,7 @@ function categorizeArticleRuleBased(content) {
  * @param {string} content - The text to analyze.
  * @return {string} The sentiment: Positive, Negative, or Neutral.
  */
-function analyzeSentiment(content) {
+ export function analyzeSentiment(content) {
   const lowerContent = content.toLowerCase();
   let positiveScore = 0;
   let negativeScore = 0;
@@ -50,7 +50,7 @@ function analyzeSentiment(content) {
  * @param {string} text - The text to analyze.
  * @return {Promise<Object>} An object with arrays for people, places, and organizations.
  */
-async function analyzeEntities(text) {
+ export async function analyzeEntities(text) {
   const doc = nlp(text);
   return {
     people: doc.people().out('array'),
@@ -59,8 +59,3 @@ async function analyzeEntities(text) {
   };
 }
 
-export default {
-  categorizeArticleRuleBased,
-  analyzeSentiment,
-  analyzeEntities,
-};

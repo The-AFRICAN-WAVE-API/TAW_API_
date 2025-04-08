@@ -90,4 +90,3 @@ export async function fetchAndStoreRssFeeds() {
   return {message: 'RSS feeds stored successfully', count: feeds.length};
 }
 
-module.exports = {fetchAndStoreRssFeeds};

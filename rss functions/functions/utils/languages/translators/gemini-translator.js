@@ -1,8 +1,8 @@
-import { GoogleGenAI } from 'google-genai';
-import { GEMINI_API_KEY } from '../../config/config.js';
+import { GoogleGenAI } from '@google/genai';
+import config from '../../../config/config.js';
 
 const genai = new GoogleGenAI({
-  apiKey: GEMINI_API_KEY,
+  apiKey: config.GEMINI_API_KEY,
 });
 
 const modelFeatures = {
@@ -38,7 +38,7 @@ const RATE_LIMIT = {
  * const translated = await translate(jsonText, 'Spanish');
  * // Returns: '{"greeting": "Hola mundo"}'
  */
-async function translate(text, targetLanguage) {
+export async function translate(text, targetLanguage) {
   let delay = RATE_LIMIT.INITIAL_DELAY;
 
   for (let attempt = 1; attempt <= RATE_LIMIT.MAX_RETRIES; attempt++) {
@@ -83,6 +83,3 @@ async function translate(text, targetLanguage) {
   }
 }
 
-export default {
-  translate,
-};

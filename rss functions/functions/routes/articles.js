@@ -3,8 +3,8 @@ import { Router } from 'express';
 // eslint-disable-next-line new-cap
 const router = Router();
 
-import { fetchAndStoreRssFeeds } from '../services/rssService';
-import { translateArticleInFrench, translateArticleInSpanish, translateArticleInGerman } from '../services/translationService';
+import { fetchAndStoreRssFeeds } from '../services/rssService.js';
+import { translateArticleInFrench, translateArticleInSpanish, translateArticleInGerman } from '../services/translationService.js';
 
 // GET /rss - Process RSS feeds and store them
 router.get('/rss', async (req, res) => {
