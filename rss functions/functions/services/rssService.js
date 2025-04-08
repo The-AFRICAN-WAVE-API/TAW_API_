@@ -46,7 +46,7 @@ export async function fetchAndStoreRssFeeds() {
         }
 
         // Language detection and translation (if needed)
-        const detectedLanguage = await detectLanguage(contentForAnalysis);
+        const detectedLanguage = detectLanguage(contentForAnalysis);
         // Duplicate checking: using the unique key as the Firestore doc ID prevents duplicate entries.
         const uniqueKey = getUniqueKey(item.title, item.link);
         return {
