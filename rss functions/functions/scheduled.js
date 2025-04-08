@@ -4,7 +4,7 @@ import fetch from 'node-fetch';
 
 export const scheduledFeedIngestion = pubsub
   .schedule('every 15 minutes')
-  .onRun(async (context) => {
+  .onRun(async () => {
     console.log('Running scheduled feed ingestion...');
 
     try {
