@@ -1,12 +1,12 @@
 // index.js
-const functions = require("firebase-functions");
-const express = require("express");
-const cors = require("cors");
-const compression = require("compression");
+import { https } from "firebase-functions";
+import express from "express";
+import cors from "cors";
+import compression from "compression";
 
 // Import route modules
-const articlesRoutes = require("./routes/articles");
-const socialRoutes = require("./routes/social");
+import articlesRoutes from "./routes/articles";
+import socialRoutes from "./routes/social";
 
 const app = express();
 app.use(cors({origin: "*"}));
@@ -16,4 +16,4 @@ app.use(compression());
 app.use("/", articlesRoutes);
 app.use("/", socialRoutes);
 
-exports.api = functions.https.onRequest(app);
+export const api = https.onRequest(app);

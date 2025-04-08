@@ -1,7 +1,7 @@
 // utils/throttle.js
-const Parser = require("rss-parser");
+import Parser from "rss-parser";
 const parser = new Parser();
-const {CACHE_TTL} = require("../config/config");
+import { CACHE_TTL } from "../config/config";
 
 // In-memory cache for feeds
 const feedCache = {};
@@ -73,4 +73,4 @@ async function throttleRequests(urls, concurrency = 10) {
   return (await Promise.all(results)).filter(Boolean);
 }
 
-module.exports = {fetchFeedWithRetry, throttleRequests};
+export default {fetchFeedWithRetry, throttleRequests};

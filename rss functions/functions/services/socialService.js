@@ -12,7 +12,7 @@ import config from "../config/config.js";
  * Excludes retweets, requests media expansions, and extracts image URLs.
  * @return {Promise<Object[]>} A promise that resolves to an array of social media post objects.
  */
-async function fetchPopularSocialPosts() {
+ export async function fetchPopularSocialPosts() {
   // Define an array of popular hashtags (without the '#' symbol)
   const popularHashtags = [
     "news",
@@ -87,7 +87,7 @@ async function fetchPopularSocialPosts() {
  * Processes and stores fetched social posts in Firestore.
  * @return {Promise<Object>} Result with message and count.
  */
-async function processAndStoreSocialPosts() {
+export async function processAndStoreSocialPosts() {
   const posts = await fetchPopularSocialPosts();
   console.log("Number of social posts to ingest:", posts.length);
   let batch = db.batch();
@@ -150,5 +150,3 @@ async function processAndStoreSocialPosts() {
   }
   return {message: "Social media posts ingested successfully", count: posts.length};
 }
-
-module.exports = {fetchPopularSocialPosts, processAndStoreSocialPosts};

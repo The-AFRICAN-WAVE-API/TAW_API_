@@ -16,7 +16,7 @@ import franc from "franc";
  * detectLanguage('Hello world'); // returns 'en'
  * detectLanguage('Bonjour le monde'); // returns 'fr'
  */
-function detectLanguage(text) {
+ export function detectLanguage(text) {
   if (!text || typeof text !== "string") {
     return "en";
   }
@@ -37,6 +37,3 @@ function detectLanguage(text) {
   }
 }
 
-module.exports = {
-  detectLanguage,
-};

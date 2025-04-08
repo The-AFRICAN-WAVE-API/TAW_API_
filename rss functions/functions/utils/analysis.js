@@ -1,7 +1,7 @@
 // utils/analysis.js
-const nlp = require("compromise");
-const sentimentKeywords = require("../sentimentKeywords");
-const categoryKeywords = require("../categoryKeywords");
+import nlp from "compromise";
+import { positive, negative } from "../sentimentKeywords";
+import categoryKeywords from "../categoryKeywords";
 
 /**
  * Categorizes content based on rule-based keyword matching.
@@ -34,10 +34,10 @@ function analyzeSentiment(content) {
   const lowerContent = content.toLowerCase();
   let positiveScore = 0;
   let negativeScore = 0;
-  sentimentKeywords.positive.forEach((keyword) => {
+  positive.forEach((keyword) => {
     if (lowerContent.includes(keyword.toLowerCase())) positiveScore++;
   });
-  sentimentKeywords.negative.forEach((keyword) => {
+  negative.forEach((keyword) => {
     if (lowerContent.includes(keyword.toLowerCase())) negativeScore++;
   });
   if (positiveScore > negativeScore && positiveScore > 0) return "Positive";
@@ -59,7 +59,7 @@ async function analyzeEntities(text) {
   };
 }
 
-module.exports = {
+export default {
   categorizeArticleRuleBased,
   analyzeSentiment,
   analyzeEntities,

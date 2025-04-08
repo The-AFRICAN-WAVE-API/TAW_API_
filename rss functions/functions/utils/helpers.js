@@ -1,5 +1,5 @@
 // utils/helpers.js
-const crypto = require("crypto");
+import { createHash } from "crypto";
 
 /**
  * Generates a unique key from title and link.
@@ -8,7 +8,7 @@ const crypto = require("crypto");
  * @return {string} The unique key.
  */
 function getUniqueKey(title, link) {
-  return crypto.createHash("sha256").update(title + link).digest("hex");
+  return createHash("sha256").update(title + link).digest("hex");
 }
 
-module.exports = {getUniqueKey};
+export default {getUniqueKey};

@@ -1,5 +1,5 @@
 // feedUrls.js
-module.exports = [
+export default [
   "https://feeds.bbci.co.uk/news/rss.xml",
   "http://rss.cnn.com/rss/cnn_topstories.rss",
   "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",

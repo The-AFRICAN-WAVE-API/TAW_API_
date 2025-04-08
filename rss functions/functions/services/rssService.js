@@ -14,7 +14,7 @@ const db = admin.firestore();
  * it will be updated rather than creating a duplicate.
  * @return {Promise<Object>} Result message and count.
  */
-async function fetchAndStoreRssFeeds() {
+export async function fetchAndStoreRssFeeds() {
   const feeds = await throttleRequests(feedUrls);
   let batch = db.batch();
   const MAX_BATCH_SIZE = 500;

@@ -87,5 +87,5 @@ const categoryKeywords = {
   ],
 };
 
-module.exports = categoryKeywords;
+export default categoryKeywords;
 
