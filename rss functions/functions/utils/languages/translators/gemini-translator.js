@@ -1,17 +1,17 @@
-import { GoogleGenAI } from "google-genai";
-import { GEMINI_API_KEY } from "../../config/config.js";
+import { GoogleGenAI } from 'google-genai';
+import { GEMINI_API_KEY } from '../../config/config.js';
 
 const genai = new GoogleGenAI({
   apiKey: GEMINI_API_KEY,
 });
 
 const modelFeatures = {
-  model: "gemini-2.0-flash-lite",
+  model: 'gemini-2.0-flash-lite',
   temperature: 0.2,
   maxOutputTokens: 8192,
   topP: 0.95,
   topK: 40,
-  responseMimeType: "text",
+  responseMimeType: 'text',
 };
 
 const RATE_LIMIT = {
@@ -43,8 +43,8 @@ async function translate(text, targetLanguage) {
 
   for (let attempt = 1; attempt <= RATE_LIMIT.MAX_RETRIES; attempt++) {
     try {
-      if (!text || typeof text !== "string") {
-        console.warn("Invalid text input for translation:", text);
+      if (!text || typeof text !== 'string') {
+        console.warn('Invalid text input for translation:', text);
         return text;
       }
 
@@ -65,8 +65,8 @@ async function translate(text, targetLanguage) {
         JSON.parse(response);
         return response;
       } catch (jsonError) {
-        console.warn("Invalid JSON response:", response);
-        throw new Error("Invalid JSON in translation response");
+        console.warn('Invalid JSON response:', response);
+        throw new Error('Invalid JSON in translation response');
       }
     } catch (error) {
       if (error.status === 429) {

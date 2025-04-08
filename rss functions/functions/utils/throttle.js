@@ -1,7 +1,7 @@
 // utils/throttle.js
-import Parser from "rss-parser";
+import Parser from 'rss-parser';
 const parser = new Parser();
-import { CACHE_TTL } from "../config/config";
+import { CACHE_TTL } from '../config/config';
 
 // In-memory cache for feeds
 const feedCache = {};
@@ -57,15 +57,15 @@ async function throttleRequests(urls, concurrency = 10) {
   const executing = new Set();
   for (const url of urls) {
     const promise = fetchFeedWithRetry(url)
-        .then((result) => {
-          executing.delete(promise);
-          return result;
-        })
-        .catch((err) => {
-          console.error(`Error fetching ${url}:`, err.message);
-          executing.delete(promise);
-          return null;
-        });
+      .then((result) => {
+        executing.delete(promise);
+        return result;
+      })
+      .catch((err) => {
+        console.error(`Error fetching ${url}:`, err.message);
+        executing.delete(promise);
+        return null;
+      });
     executing.add(promise);
     results.push(promise);
     if (executing.size >= concurrency) await Promise.race(executing);

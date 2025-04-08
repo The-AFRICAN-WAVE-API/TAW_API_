@@ -1,5 +1,5 @@
 // utils/helpers.js
-import { createHash } from "crypto";
+import { createHash } from 'crypto';
 
 /**
  * Generates a unique key from title and link.
@@ -8,7 +8,7 @@ import { createHash } from "crypto";
  * @return {string} The unique key.
  */
 function getUniqueKey(title, link) {
-  return createHash("sha256").update(title + link).digest("hex");
+  return createHash('sha256').update(title + link).digest('hex');
 }
 
 export default {getUniqueKey};

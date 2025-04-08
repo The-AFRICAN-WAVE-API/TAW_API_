@@ -1,7 +1,7 @@
 // utils/analysis.js
-import nlp from "compromise";
-import { positive, negative } from "../sentimentKeywords";
-import categoryKeywords from "../categoryKeywords";
+import nlp from 'compromise';
+import { positive, negative } from '../sentimentKeywords';
+import categoryKeywords from '../categoryKeywords';
 
 /**
  * Categorizes content based on rule-based keyword matching.
@@ -11,7 +11,7 @@ import categoryKeywords from "../categoryKeywords";
 function categorizeArticleRuleBased(content) {
   const lowerContent = content.toLowerCase();
   let maxScore = 0;
-  let assignedCategory = "Other";
+  let assignedCategory = 'Other';
   for (const [category, keywords] of Object.entries(categoryKeywords)) {
     let score = 0;
     keywords.forEach((keyword) => {
@@ -40,9 +40,9 @@ function analyzeSentiment(content) {
   negative.forEach((keyword) => {
     if (lowerContent.includes(keyword.toLowerCase())) negativeScore++;
   });
-  if (positiveScore > negativeScore && positiveScore > 0) return "Positive";
-  else if (negativeScore > positiveScore && negativeScore > 0) return "Negative";
-  else return "Neutral";
+  if (positiveScore > negativeScore && positiveScore > 0) return 'Positive';
+  else if (negativeScore > positiveScore && negativeScore > 0) return 'Negative';
+  else return 'Neutral';
 }
 
 /**
@@ -53,9 +53,9 @@ function analyzeSentiment(content) {
 async function analyzeEntities(text) {
   const doc = nlp(text);
   return {
-    people: doc.people().out("array"),
-    places: doc.places().out("array"),
-    organizations: doc.organizations().out("array"),
+    people: doc.people().out('array'),
+    places: doc.places().out('array'),
+    organizations: doc.organizations().out('array'),
   };
 }
 

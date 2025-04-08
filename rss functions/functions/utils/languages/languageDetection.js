@@ -1,4 +1,4 @@
-import franc from "franc";
+import franc from 'franc';
 
 /**
  * Detects the language of the provided text using the franc library.
@@ -16,24 +16,24 @@ import franc from "franc";
  * detectLanguage('Hello world'); // returns 'en'
  * detectLanguage('Bonjour le monde'); // returns 'fr'
  */
- export function detectLanguage(text) {
-  if (!text || typeof text !== "string") {
-    return "en";
+export function detectLanguage(text) {
+  if (!text || typeof text !== 'string') {
+    return 'en';
   }
 
   const supportedLanguages = {
-    "eng": "en",
-    "fra": "fr",
-    "deu": "de",
-    "spa": "es",
+    'eng': 'en',
+    'fra': 'fr',
+    'deu': 'de',
+    'spa': 'es',
   };
 
   try {
     const detected = franc(text);
-    return supportedLanguages[detected] || "en";
+    return supportedLanguages[detected] || 'en';
   } catch (error) {
-    console.error("Language detection error:", error);
-    return "en";
+    console.error('Language detection error:', error);
+    return 'en';
   }
 }
 

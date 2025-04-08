@@ -1,4 +1,4 @@
-import i18next, { use } from "i18next";
+import i18next, { use } from 'i18next';
 /**
  * @fileoverview Module for i18next filesystem backend integration
  * @module i18next-fs-backend
@@ -12,31 +12,31 @@ import i18next, { use } from "i18next";
  *
  * @constant {Class} Backend - The filesystem backend class for i18next
  */
-import { Backend } from "i18next-fs-backend";
+import { Backend } from 'i18next-fs-backend';
 
 use(Backend)
-    .init({
-      backend: {
-        loadPath: "locales/{{lng}}/translation.json",
-      },
-      fallbackLng: "en",
-      supportedLngs: ["en", "fr", "de", "es"],
-      saveMissing: true,
-      ns: ["common", "articles", "errors"],
-      defaultNS: ["common"],
-      detection: {
-        order: ["header", "querystring"],
-        caches: ["cookie"],
-        lookupHeader: "accept-language",
-      },
-      interpolation: {
-        escapeValue: false,
-      },
-      missingKeyHandler: (lng, ns, key) => {
-        console.log(`Missing translation: ${key} for language: ${lng}`);
-        return key;
-      },
+  .init({
+    backend: {
+      loadPath: 'locales/{{lng}}/translation.json',
     },
-    );
+    fallbackLng: 'en',
+    supportedLngs: ['en', 'fr', 'de', 'es'],
+    saveMissing: true,
+    ns: ['common', 'articles', 'errors'],
+    defaultNS: ['common'],
+    detection: {
+      order: ['header', 'querystring'],
+      caches: ['cookie'],
+      lookupHeader: 'accept-language',
+    },
+    interpolation: {
+      escapeValue: false,
+    },
+    missingKeyHandler: (lng, ns, key) => {
+      console.log(`Missing translation: ${key} for language: ${lng}`);
+      return key;
+    },
+  },
+  );
 
 export default i18next;

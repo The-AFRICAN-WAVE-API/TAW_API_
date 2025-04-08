@@ -1,5 +1,5 @@
-import { translate as geminiTranslate } from "./translators/gemini-translator.js";
-import i18next from "./translators/i18n.js";
+import { translate as geminiTranslate } from './translators/gemini-translator.js';
+import i18next from './translators/i18n.js';
 
 /**
  * A utility class for handling text translations.
@@ -22,14 +22,14 @@ class TranslationProvider {
       if (geminiResult) return geminiResult;
 
       // Fallback to i18next if Gemini fails
-      console.log("Falling back to i18next translation");
+      console.log('Falling back to i18next translation');
       return i18next.t(text, {
         lng: targetLanguage,
         defaultValue: text,
-        fallbackLng: "en",
+        fallbackLng: 'en',
       });
     } catch (error) {
-      console.error("Translation error:", error);
+      console.error('Translation error:', error);
       return text; // Return original text if both methods fail
     }
   }

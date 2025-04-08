@@ -1,5 +1,5 @@
-import { detectLanguage } from "./detectLanguage";
-import { TranslationProvider } from "./translationProvider";
+import { detectLanguage } from './detectLanguage';
+import { TranslationProvider } from './translationProvider';
 
 /**
  * Translates an article object's title and content to a target language.
@@ -21,12 +21,12 @@ import { TranslationProvider } from "./translationProvider";
  * };
  * const translatedArticle = await translateArticle(article, "en");
  */
-async function translateArticle(article, targetLanguage = "en") {
+async function translateArticle(article, targetLanguage = 'en') {
   // Ensure we have valid string content to analyze
-  const textToAnalyze = (article.content || article.title || "").toString();
+  const textToAnalyze = (article.content || article.title || '').toString();
 
   if (!textToAnalyze) {
-    console.warn("No content to analyze for language detection");
+    console.warn('No content to analyze for language detection');
     return article;
   }
 
@@ -39,7 +39,7 @@ async function translateArticle(article, targetLanguage = "en") {
   }
 
   const combinedText = JSON.stringify({
-    title: article.title || "",
+    title: article.title || '',
     content: article.content || article.description || article.contentSnippet,
   });
 
@@ -54,7 +54,7 @@ async function translateArticle(article, targetLanguage = "en") {
       language: targetLanguage,
     };
   } catch (parseError) {
-    console.error("Failed to parse translation JSON:", parseError);
+    console.error('Failed to parse translation JSON:', parseError);
     return article;
   }
 }
