@@ -10,6 +10,9 @@ import { translateArticleInFrench, translateArticleInSpanish, translateArticleIn
 // Apply the API key middleware to these routes.
 router.use('/articles', checkApiKey);
 router.use('/rss', checkApiKey);
+router.use('/articles/:category', checkApiKey);
+router.use('/search', checkApiKey);
+router.use('/related', checkApiKey);
 
 
 // GET /rss - Process RSS feeds and store them
@@ -118,7 +121,7 @@ router.get('/related', async (req, res) => {
 });
 
 // GET /articles/french - Fetching article feed translated into french
-router.get('/articles/french', async (req, res) => {
+router.get('/french/articles', async (req, res) => {
   try {
     const frenchArticles = await translateArticleInFrench();
     res.status(200);
@@ -130,7 +133,7 @@ router.get('/articles/french', async (req, res) => {
 });
 
 // GET /articles/spanish - Fetching article feed translated into spanish
-router.get('/articles/spanish', async (req, res) => {
+router.get('/spanish/articles', async (req, res) => {
   try {
     const spanishArticles = await translateArticleInSpanish();
     res.status(200);
@@ -142,7 +145,7 @@ router.get('/articles/spanish', async (req, res) => {
 });
 
 // GET /articles/german - Fetching article feed translated into german
-router.get('/articles/german', async (req, res) => {
+router.get('/german/articles', async (req, res) => {
   try {
     const germanArticles = await translateArticleInGerman();
     res.status(200);
