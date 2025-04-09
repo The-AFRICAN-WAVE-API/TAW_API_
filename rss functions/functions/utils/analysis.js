@@ -8,7 +8,7 @@ import categoryKeywords from '../categoryKeywords.js';
  * @param {string} content - The text to categorize.
  * @return {string} The assigned category.
  */
- export function categorizeArticleRuleBased(content) {
+export function categorizeArticleRuleBased(content) {
   const lowerContent = content.toLowerCase();
   let maxScore = 0;
   let assignedCategory = 'Other';
@@ -30,7 +30,7 @@ import categoryKeywords from '../categoryKeywords.js';
  * @param {string} content - The text to analyze.
  * @return {string} The sentiment: Positive, Negative, or Neutral.
  */
- export function analyzeSentiment(content) {
+export function analyzeSentiment(content) {
   const lowerContent = content.toLowerCase();
   let positiveScore = 0;
   let negativeScore = 0;
@@ -50,7 +50,7 @@ import categoryKeywords from '../categoryKeywords.js';
  * @param {string} text - The text to analyze.
  * @return {Promise<Object>} An object with arrays for people, places, and organizations.
  */
- export async function analyzeEntities(text) {
+export async function analyzeEntities(text) {
   const doc = nlp(text);
   return {
     people: doc.people().out('array'),
