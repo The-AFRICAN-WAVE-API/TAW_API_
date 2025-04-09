@@ -25,3 +25,6 @@ dist/
 # OS-specific files
 .DS_Store
 Thumbs.db
+
+**/config/news-api-f1a79-firebase-adminsdk-fbsvc-35110481a1.json
+**/config/runtimeconfig.json

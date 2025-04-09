@@ -1,21 +1,21 @@
 // scheduled.js
-const functions = require("firebase-functions");
-const fetch = require("node-fetch");
+import { pubsub } from 'firebase-functions';
+import fetch from 'node-fetch';
 
-exports.scheduledFeedIngestion = functions.pubsub
-    .schedule("every 15 minutes")
-    .onRun(async (context) => {
-      console.log("Running scheduled feed ingestion...");
+export const scheduledFeedIngestion = pubsub
+  .schedule('every 15 minutes')
+  .onRun(async () => {
+    console.log('Running scheduled feed ingestion...');
 
-      try {
+    try {
       // Call your endpoints or your direct service logic
-        await fetch("https://api-djrx553f4q-uc.a.run.app/rss");
-        await fetch("https://api-djrx553f4q-uc.a.run.app/social");
+      await fetch('https://api-djrx553f4q-uc.a.run.app/rss');
+      await fetch('https://api-djrx553f4q-uc.a.run.app/social');
 
-        console.log("Finished scheduled feed ingestion!");
-      } catch (err) {
-        console.error("Error in scheduled feed ingestion:", err);
-      }
+      console.log('Finished scheduled feed ingestion!');
+    } catch (err) {
+      console.error('Error in scheduled feed ingestion:', err);
+    }
 
-      return null;
-    });
+    return null;
+  });

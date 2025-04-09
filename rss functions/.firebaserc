@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "rss-feed-51584"
-  }
+    "default": "rss-feed-51584",
+    "News_API": "news-api-f1a79"
+  },
+  "targets": {},
+  "etags": {}
 }

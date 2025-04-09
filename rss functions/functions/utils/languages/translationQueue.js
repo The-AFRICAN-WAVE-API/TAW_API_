@@ -1,5 +1,5 @@
-const PQueue = require("p-queue");
-const {translateArticle} = require("./translation");
+import PQueue from 'p-queue';
+import { translateArticle } from './translation.js'; // Import the translation function
 
 const queue = new PQueue({
   concurrency: 2, // Number of concurrent translations
@@ -8,12 +8,12 @@ const queue = new PQueue({
 });
 
 // Add event listeners for queue monitoring
-queue.on("active", () => {
+queue.on('active', () => {
   console.log(`Working on translation. Queue size: ${queue.size}`);
 });
 
-queue.on("error", (error) => {
-  console.error("Queue error:", error);
+queue.on('error', (error) => {
+  console.error('Queue error:', error);
 });
 
 const COOLDOWN_PERIOD = 60000; // 1 minute
@@ -27,25 +27,24 @@ let lastRateLimitHit = 0;
  * @throws {Error} Translation service errors are caught and handled internally
  * @async
  */
-async function queueTranslation(article, targetLanguage) {
+export async function queueTranslation(article, targetLanguage) {
   return queue.add(async () => {
     try {
       if (Date.now() - lastRateLimitHit < COOLDOWN_PERIOD) {
-        console.warn("Rate limit hit. Waiting for cooldown...");
+        console.warn('Rate limit hit. Waiting for cooldown...');
         return null;
       }
 
       return await translateArticle(article, targetLanguage);
     } catch (error) {
       if (error.status === 429) {
-        console.warn("Rate limit hit. Waiting for cooldown...");
+        console.warn('Rate limit hit. Waiting for cooldown...');
         lastRateLimitHit = Date.now();
         return null;
       }
-      console.error("Translation error:", error);
+      console.error('Translation error:', error);
       return null;
     }
   });
 }
 
-module.exports = {queueTranslation};

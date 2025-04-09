@@ -1,7 +1,7 @@
 // utils/throttle.js
-const Parser = require("rss-parser");
+import Parser from 'rss-parser';
 const parser = new Parser();
-const {CACHE_TTL} = require("../config/config");
+import config from '../config/config.js';
 
 // In-memory cache for feeds
 const feedCache = {};
@@ -18,7 +18,7 @@ const feedCache = {};
 async function fetchFeedWithRetry(url, retries = 3, initialDelay = 1000, requestTimeout = 10000) {
   // Check cache
   const cached = feedCache[url];
-  if (cached && (Date.now() - cached.timestamp) < CACHE_TTL) {
+  if (cached && (Date.now() - cached.timestamp) < config.CACHE_TTL) {
     console.log(`Cache hit for ${url}`);
     return cached.feed;
   }
@@ -57,15 +57,15 @@ async function throttleRequests(urls, concurrency = 10) {
   const executing = new Set();
   for (const url of urls) {
     const promise = fetchFeedWithRetry(url)
-        .then((result) => {
-          executing.delete(promise);
-          return result;
-        })
-        .catch((err) => {
-          console.error(`Error fetching ${url}:`, err.message);
-          executing.delete(promise);
-          return null;
-        });
+      .then((result) => {
+        executing.delete(promise);
+        return result;
+      })
+      .catch((err) => {
+        console.error(`Error fetching ${url}:`, err.message);
+        executing.delete(promise);
+        return null;
+      });
     executing.add(promise);
     results.push(promise);
     if (executing.size >= concurrency) await Promise.race(executing);
@@ -73,4 +73,4 @@ async function throttleRequests(urls, concurrency = 10) {
   return (await Promise.all(results)).filter(Boolean);
 }
 
-module.exports = {fetchFeedWithRetry, throttleRequests};
+export {fetchFeedWithRetry, throttleRequests};

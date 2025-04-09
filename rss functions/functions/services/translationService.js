@@ -1,6 +1,6 @@
-const admin = require("firebase-admin");
+import admin from 'firebase-admin';
 const db = admin.firestore();
-const queueTranslation = require("../utils/languages/translationQueue").queueTranslation;
+import { queueTranslation } from '../utils/languages/translationQueue.js';
 
 const DEFAULT_LIMIT = 10;
 
@@ -19,24 +19,24 @@ const DEFAULT_LIMIT = 10;
  *   console.error(error);
  * }
  */
-async function translateArticleInFrench(LIMIT=DEFAULT_LIMIT) {
+export async function translateArticleInFrench(LIMIT=DEFAULT_LIMIT) {
   try {
-    const snapshot = await db.collection("rss_articles").get(LIMIT);
+    const snapshot = await db.collection('rss_articles').get(LIMIT);
     if (snapshot.empty) {
-      console.log("No articles found.");
-      return {message: "No articles found.", count: 0};
+      console.log('No articles found.');
+      return {message: 'No articles found.', count: 0};
     }
     const articles = snapshot.docs.map((doc) => ({id: doc.id, ...doc.data()}));
     const translatedArticles = await Promise.all(
-        articles.map(async (article) => {
-          const translatedContent = await queueTranslation(article, "fr");
-          return {...article, translatedContent};
-        }),
+      articles.map(async (article) => {
+        const translatedContent = await queueTranslation(article, 'fr');
+        return {...article, translatedContent};
+      }),
     );
     return translatedArticles;
   } catch (error) {
-    console.error("Error translating articles:", error);
-    throw new Error("Failed to translate articles.");
+    console.error('Error translating articles:', error);
+    throw new Error('Failed to translate articles.');
   }
 }
 
@@ -54,24 +54,24 @@ async function translateArticleInFrench(LIMIT=DEFAULT_LIMIT) {
  *   console.error(error);
  * }
  */
-async function translateArticleInSpanish(LIMIT=DEFAULT_LIMIT) {
+export async function translateArticleInSpanish(LIMIT=DEFAULT_LIMIT) {
   try {
-    const snapshot = await db.collection("rss_articles").get(LIMIT);
+    const snapshot = await db.collection('rss_articles').get(LIMIT);
     if (snapshot.empty) {
-      console.log("No articles found.");
-      return {message: "No articles found.", count: 0};
+      console.log('No articles found.');
+      return {message: 'No articles found.', count: 0};
     }
     const articles = snapshot.docs.map((doc) => ({id: doc.id, ...doc.data()}));
     const translatedArticles = await Promise.all(
-        articles.map(async (article) => {
-          const translatedContent = await queueTranslation(article, "es");
-          return {...article, translatedContent};
-        }),
+      articles.map(async (article) => {
+        const translatedContent = await queueTranslation(article, 'es');
+        return {...article, translatedContent};
+      }),
     );
     return translatedArticles;
   } catch (error) {
-    console.error("Error translating articles:", error);
-    throw new Error("Failed to translate articles.");
+    console.error('Error translating articles:', error);
+    throw new Error('Failed to translate articles.');
   }
 }
 
@@ -90,29 +90,24 @@ async function translateArticleInSpanish(LIMIT=DEFAULT_LIMIT) {
  *   console.error(error);
  * }
  */
-async function translateArticleInGerman(LIMIT=DEFAULT_LIMIT) {
+export async function translateArticleInGerman(LIMIT=DEFAULT_LIMIT) {
   try {
-    const snapshot = await db.collection("rss_articles").get(LIMIT);
+    const snapshot = await db.collection('rss_articles').get(LIMIT);
     if (snapshot.empty) {
-      console.log("No articles found.");
-      return {message: "No articles found.", count: 0};
+      console.log('No articles found.');
+      return {message: 'No articles found.', count: 0};
     }
     const articles = snapshot.docs.map((doc) => ({id: doc.id, ...doc.data()}));
     const translatedArticles = await Promise.all(
-        articles.map(async (article) => {
-          const translatedContent = await queueTranslation(article, "de");
-          return {...article, translatedContent};
-        }),
+      articles.map(async (article) => {
+        const translatedContent = await queueTranslation(article, 'de');
+        return {...article, translatedContent};
+      }),
     );
     return translatedArticles;
   } catch (error) {
-    console.error("Error translating articles:", error);
-    throw new Error("Failed to translate articles.");
+    console.error('Error translating articles:', error);
+    throw new Error('Failed to translate articles.');
   }
 }
 
-module.exports = {
-  translateArticleInFrench,
-  translateArticleInSpanish,
-  translateArticleInGerman,
-};
