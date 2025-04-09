@@ -2,9 +2,15 @@
 import { Router } from 'express';
 // eslint-disable-next-line new-cap
 const router = Router();
-
+import admin from 'firebase-admin';
+const { checkApiKey } = require('../utils/auth.js');
 import { fetchAndStoreRssFeeds } from '../services/rssService.js';
 import { translateArticleInFrench, translateArticleInSpanish, translateArticleInGerman } from '../services/translationService.js';
+
+// Apply the API key middleware to these routes.
+router.use('/articles', checkApiKey);
+router.use('/rss', checkApiKey);
+
 
 // GET /rss - Process RSS feeds and store them
 router.get('/rss', async (req, res) => {
@@ -20,7 +26,6 @@ router.get('/rss', async (req, res) => {
 
 // GET /articles - Retrieve all articles
 router.get('/articles', async (req, res) => {
-  const admin = require('firebase-admin');
   const db = admin.firestore();
   try {
     const snapshot = await db.collectionGroup('articles').orderBy('createdAt', 'desc').get();
@@ -34,7 +39,6 @@ router.get('/articles', async (req, res) => {
 
 // GET /articles/:category - Retrieve articles by category
 router.get('/articles/:category', async (req, res) => {
-  const admin = require('firebase-admin');
   const db = admin.firestore();
   try {
     let {category} = req.params;
@@ -50,7 +54,6 @@ router.get('/articles/:category', async (req, res) => {
 
 // GET /search - Search articles by keyword
 router.get('/search', async (req, res) => {
-  const admin = require('firebase-admin');
   const db = admin.firestore();
   try {
     const keywords = Object.values(req.query).map((kw) => kw.toLowerCase()).filter(Boolean);
@@ -78,7 +81,6 @@ router.get('/search', async (req, res) => {
 
 // GET /related - Fetch related articles based on an article title
 router.get('/related', async (req, res) => {
-  const admin = require('firebase-admin');
   const db = admin.firestore();
   const nlp = require('compromise');
   try {
