@@ -1,17 +1,17 @@
-const {GoogleGenAI} = require("google-genai");
-const {GEMINI_API_KEY} = require("../../config/config.js");
+import { GoogleGenAI } from '@google/genai';
+import config from '../../../config/config.js';
 
 const genai = new GoogleGenAI({
-  apiKey: GEMINI_API_KEY,
+  apiKey: config.GEMINI_API_KEY,
 });
 
 const modelFeatures = {
-  model: "gemini-2.0-flash-lite",
+  model: 'gemini-2.0-flash-lite',
   temperature: 0.2,
   maxOutputTokens: 8192,
   topP: 0.95,
   topK: 40,
-  responseMimeType: "text",
+  responseMimeType: 'text',
 };
 
 const RATE_LIMIT = {
@@ -38,13 +38,13 @@ const RATE_LIMIT = {
  * const translated = await translate(jsonText, 'Spanish');
  * // Returns: '{"greeting": "Hola mundo"}'
  */
-async function translate(text, targetLanguage) {
+export async function translate(text, targetLanguage) {
   let delay = RATE_LIMIT.INITIAL_DELAY;
 
   for (let attempt = 1; attempt <= RATE_LIMIT.MAX_RETRIES; attempt++) {
     try {
-      if (!text || typeof text !== "string") {
-        console.warn("Invalid text input for translation:", text);
+      if (!text || typeof text !== 'string') {
+        console.warn('Invalid text input for translation:', text);
         return text;
       }
 
@@ -65,8 +65,8 @@ async function translate(text, targetLanguage) {
         JSON.parse(response);
         return response;
       } catch (jsonError) {
-        console.warn("Invalid JSON response:", response);
-        throw new Error("Invalid JSON in translation response");
+        console.warn('Invalid JSON response:', response);
+        throw new Error('Invalid JSON in translation response');
       }
     } catch (error) {
       if (error.status === 429) {
@@ -83,6 +83,3 @@ async function translate(text, targetLanguage) {
   }
 }
 
-module.exports = {
-  translate,
-};

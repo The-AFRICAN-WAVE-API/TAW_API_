@@ -1,5 +1,5 @@
-const {detectLanguage} = require("./detectLanguage");
-const {TranslationProvider} = require("./translationProvider");
+import { detectLanguage } from './languageDetection.js';
+import TranslationProvider  from './translationProvider.js';
 
 /**
  * Translates an article object's title and content to a target language.
@@ -21,48 +21,41 @@ const {TranslationProvider} = require("./translationProvider");
  * };
  * const translatedArticle = await translateArticle(article, "en");
  */
-async function translateArticle(article, targetLanguage = "en") {
+export async function translateArticle(article, targetLanguage = 'en') {
+  // Ensure we have valid string content to analyze
+  const textToAnalyze = (article.content || article.title || '').toString();
+
+  if (!textToAnalyze) {
+    console.warn('No content to analyze for language detection');
+    return article;
+  }
+
+  // Use detectLanguage function to determine source language
+  const sourceLanguage = await detectLanguage(textToAnalyze);
+
+  // Skip translation if already in target language
+  if (sourceLanguage === targetLanguage) {
+    return {...article, language: targetLanguage};
+  }
+
+  const combinedText = JSON.stringify({
+    title: article.title || '',
+    content: article.content || article.description || article.contentSnippet,
+  });
+
   try {
-    // Ensure we have valid string content to analyze
-    const textToAnalyze = (article.content || article.title || "").toString();
+    const translatedJSON = await TranslationProvider.translate(combinedText, targetLanguage);
 
-    if (!textToAnalyze) {
-      console.warn("No content to analyze for language detection");
-      return article;
-    }
-
-    // Use detectLanguage function to determine source language
-    const sourceLanguage = await detectLanguage(textToAnalyze);
-
-    // Skip translation if already in target language
-    if (sourceLanguage === targetLanguage) {
-      return {...article, language: targetLanguage};
-    }
-
-    const combinedText = JSON.stringify({
-      title: article.title || "",
-      content: article.content || article.description || article.contentSnippet,
-    });
-
-    try {
-      const translatedJSON = await TranslationProvider.translate(combinedText, targetLanguage);
-
-      const {title, content} = JSON.parse(translatedJSON);
-      return {
-        ...article,
-        title,
-        content,
-        language: targetLanguage,
-      };
-    } catch (parseError) {
-      console.error("Failed to parse translation JSON:", parseError);
-      return article;
-    }
-  } catch (error) {
-    throw error;
+    const {title, content} = JSON.parse(translatedJSON);
+    return {
+      ...article,
+      title,
+      content,
+      language: targetLanguage,
+    };
+  } catch (parseError) {
+    console.error('Failed to parse translation JSON:', parseError);
+    return article;
   }
 }
 
-module.exports = {
-  translateArticle,
-};

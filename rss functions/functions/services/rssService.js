@@ -1,10 +1,10 @@
 // services/rssService.js
-const {throttleRequests} = require("../utils/throttle");
-const feedUrls = require("../feedUrls");
-const {categorizeArticleRuleBased, analyzeSentiment, analyzeEntities} = require("../utils/analysis");
-const {getUniqueKey} = require("../utils/helpers");
-const admin = require("../config/firebase");
-const {langageDetection} = require("../utils/languageDetection");
+import {throttleRequests} from '../utils/throttle.js';
+import feedUrls from '../feedUrls.js';
+import {categorizeArticleRuleBased, analyzeSentiment, analyzeEntities} from '../utils/analysis.js';
+import {getUniqueKey} from '../utils/helpers.js';
+import admin from '../config/firebase.js';
+import {detectLanguage} from '../utils/languages/languageDetection.js';
 const db = admin.firestore();
 
 /**
@@ -14,7 +14,7 @@ const db = admin.firestore();
  * it will be updated rather than creating a duplicate.
  * @return {Promise<Object>} Result message and count.
  */
-async function fetchAndStoreRssFeeds() {
+export async function fetchAndStoreRssFeeds() {
   const feeds = await throttleRequests(feedUrls);
   let batch = db.batch();
   const MAX_BATCH_SIZE = 500;
@@ -23,53 +23,53 @@ async function fetchAndStoreRssFeeds() {
   for (const feed of feeds) {
     if (!feed || !feed.items) continue;
     const processedItems = await Promise.all(
-        feed.items.map(async (item) => {
-          const contentForAnalysis =
-          item["content:encoded"] || item.content || item.description || item.contentSnippet || "";
-          const category = categorizeArticleRuleBased(contentForAnalysis);
-          const sentiment = analyzeSentiment(contentForAnalysis);
-          let entities = {};
-          try {
-            entities = await analyzeEntities(contentForAnalysis);
-          } catch (e) {
-            console.error("Entity analysis failed for article:", item.title, e);
-          }
-          let geoLocation = null;
-          if (item["geo:lat"] && item["geo:long"]) {
-            geoLocation = {lat: parseFloat(item["geo:lat"]), lng: parseFloat(item["geo:long"])};
-          } else if (entities.places && entities.places.length > 0) {
-            geoLocation = entities.places[0];
-          }
-          let imageUrl = null;
-          if (item.enclosure && item.enclosure.url) {
-            imageUrl = item.enclosure.url;
-          }
+      feed.items.map(async (item) => {
+        const contentForAnalysis =
+          item['content:encoded'] || item.content || item.description || item.contentSnippet || '';
+        const category = categorizeArticleRuleBased(contentForAnalysis);
+        const sentiment = analyzeSentiment(contentForAnalysis);
+        let entities = {};
+        try {
+          entities = await analyzeEntities(contentForAnalysis);
+        } catch (e) {
+          console.error('Entity analysis failed for article:', item.title, e);
+        }
+        let geoLocation = null;
+        if (item['geo:lat'] && item['geo:long']) {
+          geoLocation = {lat: parseFloat(item['geo:lat']), lng: parseFloat(item['geo:long'])};
+        } else if (entities.places && entities.places.length > 0) {
+          geoLocation = entities.places[0];
+        }
+        let imageUrl = null;
+        if (item.enclosure && item.enclosure.url) {
+          imageUrl = item.enclosure.url;
+        }
 
-          // Language detection and translation (if needed)
-          const detectedLanguage = await langageDetection(contentForAnalysis);
-          // Duplicate checking: using the unique key as the Firestore doc ID prevents duplicate entries.
-          const uniqueKey = getUniqueKey(item.title, item.link);
-          return {
-            uniqueKey,
-            data: {
-              title: item.title,
-              link: item.link,
-              pubDate: item.pubDate || null,
-              source: feed.title,
-              category,
-              sentiment,
-              entities,
-              location: geoLocation,
-              description: contentForAnalysis,
-              langage: detectedLanguage,
-              imageUrl,
-              createdAt: admin.firestore.FieldValue.serverTimestamp(),
-            },
-          };
-        }),
+        // Language detection and translation (if needed)
+        const detectedLanguage = detectLanguage(contentForAnalysis);
+        // Duplicate checking: using the unique key as the Firestore doc ID prevents duplicate entries.
+        const uniqueKey = getUniqueKey(item.title, item.link);
+        return {
+          uniqueKey,
+          data: {
+            title: item.title,
+            link: item.link,
+            pubDate: item.pubDate || null,
+            source: feed.title,
+            category,
+            sentiment,
+            entities,
+            location: geoLocation,
+            description: contentForAnalysis,
+            langage: detectedLanguage,
+            imageUrl,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          },
+        };
+      }),
     );
     for (const {uniqueKey, data} of processedItems) {
-      const collectionRef = db.collection("rss_articles").doc(data.category).collection("articles");
+      const collectionRef = db.collection('rss_articles').doc(data.category).collection('articles');
       const docRef = collectionRef.doc(uniqueKey);
 
       // Upsert operation: If a document with uniqueKey already exists, this will update it (preventing duplicates)
@@ -77,7 +77,7 @@ async function fetchAndStoreRssFeeds() {
       operationCount++;
       if (operationCount >= MAX_BATCH_SIZE) {
         await batch.commit();
-        console.log("Committed a batch of RSS articles, count:", operationCount);
+        console.log('Committed a batch of RSS articles, count:', operationCount);
         batch = db.batch();
         operationCount = 0;
       }
@@ -85,9 +85,8 @@ async function fetchAndStoreRssFeeds() {
   }
   if (operationCount > 0) {
     await batch.commit();
-    console.log("Final batch commit executed for RSS articles, remaining count:", operationCount);
+    console.log('Final batch commit executed for RSS articles, remaining count:', operationCount);
   }
-  return {message: "RSS feeds stored successfully", count: feeds.length};
+  return {message: 'RSS feeds stored successfully', count: feeds.length};
 }
 
-module.exports = {fetchAndStoreRssFeeds};
