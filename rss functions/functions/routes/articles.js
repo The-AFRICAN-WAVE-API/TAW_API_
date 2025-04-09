@@ -1,7 +1,10 @@
 // routes/articles.js
 import { Router } from 'express';
+import admin from '../config/firebase.js';
+import nlp from 'compromise';
 // eslint-disable-next-line new-cap
 const router = Router();
+const db = admin.firestore();
 
 import { fetchAndStoreRssFeeds } from '../services/rssService.js';
 import { translateArticleInFrench, translateArticleInSpanish, translateArticleInGerman } from '../services/translationService.js';
@@ -20,8 +23,8 @@ router.get('/rss', async (req, res) => {
 
 // GET /articles - Retrieve all articles
 router.get('/articles', async (req, res) => {
-  const admin = require('firebase-admin');
-  const db = admin.firestore();
+  //const admin = require('firebase-admin');
+  //const db = admin.firestore();
   try {
     const snapshot = await db.collectionGroup('articles').orderBy('createdAt', 'desc').get();
     const articles = snapshot.docs.map((doc) => ({id: doc.id, ...doc.data()}));
@@ -34,8 +37,8 @@ router.get('/articles', async (req, res) => {
 
 // GET /articles/:category - Retrieve articles by category
 router.get('/articles/:category', async (req, res) => {
-  const admin = require('firebase-admin');
-  const db = admin.firestore();
+  //const admin = require('firebase-admin');
+  //const db = admin.firestore();
   try {
     let {category} = req.params;
     category = category.charAt(0).toUpperCase() + category.slice(1).toLowerCase();
@@ -50,8 +53,8 @@ router.get('/articles/:category', async (req, res) => {
 
 // GET /search - Search articles by keyword
 router.get('/search', async (req, res) => {
-  const admin = require('firebase-admin');
-  const db = admin.firestore();
+  //const admin = require('firebase-admin');
+  //const db = admin.firestore();
   try {
     const keywords = Object.values(req.query).map((kw) => kw.toLowerCase()).filter(Boolean);
     if (keywords.length === 0) {
@@ -78,9 +81,9 @@ router.get('/search', async (req, res) => {
 
 // GET /related - Fetch related articles based on an article title
 router.get('/related', async (req, res) => {
-  const admin = require('firebase-admin');
-  const db = admin.firestore();
-  const nlp = require('compromise');
+  //const admin = require('firebase-admin');
+  //const db = admin.firestore();
+  //const nlp = require('compromise');
   try {
     const {title} = req.query;
     if (!title) return res.status(400).json({error: 'Missing \'title\' query parameter.'});
@@ -116,7 +119,7 @@ router.get('/related', async (req, res) => {
 });
 
 // GET /articles/french - Fetching article feed translated into french
-router.get('/articles/french', async (req, res) => {
+router.get('/french/articles', async (req, res) => {
   try {
     const frenchArticles = await translateArticleInFrench();
     res.status(200);
@@ -128,7 +131,7 @@ router.get('/articles/french', async (req, res) => {
 });
 
 // GET /articles/spanish - Fetching article feed translated into spanish
-router.get('/articles/spanish', async (req, res) => {
+router.get('/spanish/articles', async (req, res) => {
   try {
     const spanishArticles = await translateArticleInSpanish();
     res.status(200);
@@ -140,7 +143,7 @@ router.get('/articles/spanish', async (req, res) => {
 });
 
 // GET /articles/german - Fetching article feed translated into german
-router.get('/articles/german', async (req, res) => {
+router.get('/german/articles', async (req, res) => {
   try {
     const germanArticles = await translateArticleInGerman();
     res.status(200);
