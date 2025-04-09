@@ -1,5 +1,5 @@
 // utils/auth.js
-const functions = require('firebase-functions'); // Option A: using functions.config()
+import functions from 'firebase-functions'; // Option A: using functions.config()
 const API_KEY = functions.config().api ? functions.config().api.key : null;
 
 // Alternatively, if using Option B, import from your config file:
@@ -24,4 +24,4 @@ function checkApiKey(req, res, next) {
   next();
 }
 
-module.exports = {checkApiKey};
+export default checkApiKey;

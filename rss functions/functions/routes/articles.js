@@ -3,7 +3,7 @@ import { Router } from 'express';
 // eslint-disable-next-line new-cap
 const router = Router();
 import admin from 'firebase-admin';
-const { checkApiKey } = require('../utils/auth.js');
+import checkApiKey from '../utils/auth.js';
 import { fetchAndStoreRssFeeds } from '../services/rssService.js';
 import { translateArticleInFrench, translateArticleInSpanish, translateArticleInGerman } from '../services/translationService.js';
 
