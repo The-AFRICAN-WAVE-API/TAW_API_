@@ -2,9 +2,15 @@
 import { Router } from 'express';
 // eslint-disable-next-line new-cap
 const router = Router();
+import admin from 'firebase-admin';
+import checkApiKey from '../utils/auth.js';
 
 import { processAndStoreSocialPosts } from '../services/socialService.js';
 
+
+
+router.use('/social', checkApiKey);
+router.use('/socialpost', checkApiKey);
 // GET /social - Process and store social media posts
 router.get('/social', async (req, res) => {
   try {
@@ -19,7 +25,6 @@ router.get('/social', async (req, res) => {
 
 // GET /socialpost - Retrieve all stored social posts
 router.get('/socialpost', async (req, res) => {
-  const admin = require('firebase-admin');
   const db = admin.firestore();
   try {
     const snapshot = await db.collection('social_posts').orderBy('createdAt', 'desc').get();

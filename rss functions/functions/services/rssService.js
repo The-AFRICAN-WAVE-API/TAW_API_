@@ -61,7 +61,7 @@ export async function fetchAndStoreRssFeeds() {
             entities,
             location: geoLocation,
             description: contentForAnalysis,
-            langage: detectedLanguage,
+            language: detectedLanguage,
             imageUrl,
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
           },

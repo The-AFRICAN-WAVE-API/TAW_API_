@@ -40,17 +40,20 @@ export async function translateArticle(article, targetLanguage = 'en') {
 
   const combinedText = JSON.stringify({
     title: article.title || '',
-    content: article.content || article.description || article.contentSnippet,
+    description: article.description || article.contentSnippet || '',
+    location: article.location || '',
+
   });
 
   try {
     const translatedJSON = await TranslationProvider.translate(combinedText, targetLanguage);
 
-    const {title, content} = JSON.parse(translatedJSON);
+    const {title, description, location} = JSON.parse(translatedJSON);
     return {
       ...article,
       title,
-      content,
+      description,
+      location,
       language: targetLanguage,
     };
   } catch (parseError) {
