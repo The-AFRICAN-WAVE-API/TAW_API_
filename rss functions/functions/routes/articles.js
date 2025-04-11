@@ -1,13 +1,19 @@
 // routes/articles.js
 import { Router } from 'express';
-import admin from '../config/firebase.js';
-import nlp from 'compromise';
 // eslint-disable-next-line new-cap
 const router = Router();
-const db = admin.firestore();
-
+import admin from 'firebase-admin';
+import checkApiKey from '../utils/auth.js';
 import { fetchAndStoreRssFeeds } from '../services/rssService.js';
 import { translateArticleInFrench, translateArticleInSpanish, translateArticleInGerman } from '../services/translationService.js';
+
+// Apply the API key middleware to these routes.
+router.use('/articles', checkApiKey);
+router.use('/rss', checkApiKey);
+router.use('/articles/:category', checkApiKey);
+router.use('/search', checkApiKey);
+router.use('/related', checkApiKey);
+
 
 // GET /rss - Process RSS feeds and store them
 router.get('/rss', async (req, res) => {
@@ -23,8 +29,7 @@ router.get('/rss', async (req, res) => {
 
 // GET /articles - Retrieve all articles
 router.get('/articles', async (req, res) => {
-  //const admin = require('firebase-admin');
-  //const db = admin.firestore();
+  const db = admin.firestore();
   try {
     const snapshot = await db.collectionGroup('articles').orderBy('createdAt', 'desc').get();
     const articles = snapshot.docs.map((doc) => ({id: doc.id, ...doc.data()}));
@@ -37,8 +42,7 @@ router.get('/articles', async (req, res) => {
 
 // GET /articles/:category - Retrieve articles by category
 router.get('/articles/:category', async (req, res) => {
-  //const admin = require('firebase-admin');
-  //const db = admin.firestore();
+  const db = admin.firestore();
   try {
     let {category} = req.params;
     category = category.charAt(0).toUpperCase() + category.slice(1).toLowerCase();
@@ -53,8 +57,7 @@ router.get('/articles/:category', async (req, res) => {
 
 // GET /search - Search articles by keyword
 router.get('/search', async (req, res) => {
-  //const admin = require('firebase-admin');
-  //const db = admin.firestore();
+  const db = admin.firestore();
   try {
     const keywords = Object.values(req.query).map((kw) => kw.toLowerCase()).filter(Boolean);
     if (keywords.length === 0) {
@@ -81,9 +84,8 @@ router.get('/search', async (req, res) => {
 
 // GET /related - Fetch related articles based on an article title
 router.get('/related', async (req, res) => {
-  //const admin = require('firebase-admin');
-  //const db = admin.firestore();
-  //const nlp = require('compromise');
+  const db = admin.firestore();
+  const nlp = require('compromise');
   try {
     const {title} = req.query;
     if (!title) return res.status(400).json({error: 'Missing \'title\' query parameter.'});
