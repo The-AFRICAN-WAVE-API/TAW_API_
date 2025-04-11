@@ -21,7 +21,7 @@ const DEFAULT_LIMIT = 10;
  */
 export async function translateArticleInFrench(LIMIT=DEFAULT_LIMIT) {
   try {
-    const snapshot = await db.collection('rss_articles').get(LIMIT);
+    const snapshot = await db.collectionGroup('articles').limit(LIMIT).get();
     if (snapshot.empty) {
       console.log('No articles found.');
       return {message: 'No articles found.', count: 0};
@@ -56,7 +56,7 @@ export async function translateArticleInFrench(LIMIT=DEFAULT_LIMIT) {
  */
 export async function translateArticleInSpanish(LIMIT=DEFAULT_LIMIT) {
   try {
-    const snapshot = await db.collection('rss_articles').get(LIMIT);
+    const snapshot = await db.collectionGroup('articles').orderBy('createdAt', 'desc').limit(LIMIT).get();
     if (snapshot.empty) {
       console.log('No articles found.');
       return {message: 'No articles found.', count: 0};
@@ -92,7 +92,7 @@ export async function translateArticleInSpanish(LIMIT=DEFAULT_LIMIT) {
  */
 export async function translateArticleInGerman(LIMIT=DEFAULT_LIMIT) {
   try {
-    const snapshot = await db.collection('rss_articles').get(LIMIT);
+    const snapshot = await db.collectionGroup('articles').limit(LIMIT).get();
     if (snapshot.empty) {
       console.log('No articles found.');
       return {message: 'No articles found.', count: 0};
