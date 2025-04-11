@@ -30,7 +30,7 @@ export async function translateArticleInFrench(LIMIT=DEFAULT_LIMIT) {
     const translatedArticles = await Promise.all(
       articles.map(async (article) => {
         const translatedContent = await queueTranslation(article, 'fr');
-        return {...article, translatedContent};
+        return translatedContent;
       }),
     );
     return translatedArticles;
@@ -65,7 +65,7 @@ export async function translateArticleInSpanish(LIMIT=DEFAULT_LIMIT) {
     const translatedArticles = await Promise.all(
       articles.map(async (article) => {
         const translatedContent = await queueTranslation(article, 'es');
-        return {...article, translatedContent};
+        return translatedContent;
       }),
     );
     return translatedArticles;
@@ -101,7 +101,7 @@ export async function translateArticleInGerman(LIMIT=DEFAULT_LIMIT) {
     const translatedArticles = await Promise.all(
       articles.map(async (article) => {
         const translatedContent = await queueTranslation(article, 'de');
-        return {...article, translatedContent};
+        return translatedContent;
       }),
     );
     return translatedArticles;

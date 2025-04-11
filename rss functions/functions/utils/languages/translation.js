@@ -48,11 +48,12 @@ export async function translateArticle(article, targetLanguage = 'en') {
   try {
     const translatedJSON = await TranslationProvider.translate(combinedText, targetLanguage);
 
-    const {title, content} = JSON.parse(translatedJSON);
+    const {title, description, location} = JSON.parse(translatedJSON);
     return {
       ...article,
       title,
-      content,
+      description,
+      location,
       language: targetLanguage,
     };
   } catch (parseError) {
