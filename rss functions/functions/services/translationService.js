@@ -6,6 +6,29 @@ const DEFAULT_LIMIT = 10;
 
 const TARGET_LANGUAGES = ['fr', 'de', 'es'];
 
+/**
+ * Fetches articles from Firestore, translates them to target languages if translations don't exist,
+ * and stores the translated versions in language-specific subcollections.
+ * 
+ * @async
+ * @function translateAndStoreArticles
+ * @throws {Error} If there's an error during the translation or storage process
+ * 
+ * @returns {Promise<void>} A promise that resolves when all articles have been processed
+ * 
+ * @description
+ * This function:
+ * 1. Retrieves articles from all article collections in Firestore
+ * 2. For each article and target language combination:
+ *    - Checks if a translation already exists
+ *    - If no translation exists, queues the article for translation
+ *    - Stores the translated version in a language-specific subcollection
+ * 3. Each translated article includes the original article's data plus:
+ *    - Translated title and description
+ *    - Original article ID reference
+ *    - Target language identifier
+ *    - Translation timestamp
+ */
 async function translateAndStoreArticles() {
     try {
         // Fetch articles from Firestore
