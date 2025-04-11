@@ -4,110 +4,53 @@ import { queueTranslation } from '../utils/languages/translationQueue.js';
 
 const DEFAULT_LIMIT = 10;
 
+const TARGET_LANGUAGES = ['fr', 'de', 'es'];
 
-/**
- * Translates articles from the database into French
- * @param {number} [LIMIT=DEFAULT_LIMIT] - Maximum number of articles to retrieve and translate
- * @returns {Promise<Array<Object>|{message: string, count: number}>} Array of translated articles or error message object
- * @throws {Error} When translation fails
- * 
- * @example
- * try {
- *   const translatedArticles = await translateArticleInFrench(10);
- *   console.log(translatedArticles);
- * } catch (error) {
- *   console.error(error);
- * }
- */
-export async function translateArticleInFrench(LIMIT=DEFAULT_LIMIT) {
-  try {
-    const snapshot = await db.collectionGroup('articles').limit(LIMIT).get();
-    if (snapshot.empty) {
-      console.log('No articles found.');
-      return {message: 'No articles found.', count: 0};
+async function translateAndStoreArticles() {
+    try {
+        // Fetch articles from Firestore
+        const articlesRef = db.collectionGroup('articles');
+        const snapshot = await articlesRef.limit(DEFAULT_LIMIT).get();
+        
+        if (snapshot.empty) {
+            console.log('No articles found to translate');
+            return;
+        }
+
+        for (const doc of snapshot.docs) {
+            const article = doc.data();
+            const articleId = doc.id;
+
+            // Process each target language
+            for (const targetLang of TARGET_LANGUAGES) {
+                // Check if translation already exists
+                const translationRef = doc.ref.collection(targetLang).doc(articleId);
+                const translationDoc = await translationRef.get();
+
+                if (!translationDoc.exists) {
+                    // Queue translation for title and content
+                    const translatedArticle = await queueTranslation(
+                        article,
+                        targetLang
+                    );
+                    // Store translated version in language subcollection
+                    await translationRef.set({
+                        ...article,
+                        title: translatedArticle.title,
+                        description: translatedArticle.description,
+                        originalId: articleId,
+                        language: targetLang,
+                        translatedAt: admin.firestore.FieldValue.serverTimestamp()
+                    });
+
+                    console.log(`Article ${articleId} translated to ${targetLang}`);
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error in translation process:', error);
+        throw error;
     }
-    const articles = snapshot.docs.map((doc) => ({id: doc.id, ...doc.data()}));
-    const translatedArticles = await Promise.all(
-      articles.map(async (article) => {
-        const translatedContent = await queueTranslation(article, 'fr');
-        return translatedContent;
-      }),
-    );
-    return translatedArticles;
-  } catch (error) {
-    console.error('Error translating articles:', error);
-    throw new Error('Failed to translate articles.');
-  }
 }
 
-/**
- * Translates articles from the database into Spanish
- * @param {number} [LIMIT=DEFAULT_LIMIT] - Maximum number of articles to retrieve and translate
- * @returns {Promise<Array<Object>|{message: string, count: number}>} Array of translated articles or error message object
- * @throws {Error} When translation fails
- * 
- * @example
- * try {
- *   const translatedArticles = await translateArticleInSpanish(10);
- *   console.log(translatedArticles);
- * } catch (error) {
- *   console.error(error);
- * }
- */
-export async function translateArticleInSpanish(LIMIT=DEFAULT_LIMIT) {
-  try {
-    const snapshot = await db.collectionGroup('articles').orderBy('createdAt', 'desc').limit(LIMIT).get();
-    if (snapshot.empty) {
-      console.log('No articles found.');
-      return {message: 'No articles found.', count: 0};
-    }
-    const articles = snapshot.docs.map((doc) => ({id: doc.id, ...doc.data()}));
-    const translatedArticles = await Promise.all(
-      articles.map(async (article) => {
-        const translatedContent = await queueTranslation(article, 'es');
-        return translatedContent;
-      }),
-    );
-    return translatedArticles;
-  } catch (error) {
-    console.error('Error translating articles:', error);
-    throw new Error('Failed to translate articles.');
-  }
-}
-
-
-/**
- * Translates articles from the database into German
- * @param {number} [LIMIT=DEFAULT_LIMIT] - Maximum number of articles to retrieve and translate
- * @returns {Promise<Array<Object>|{message: string, count: number}>} Array of translated articles or error message object
- * @throws {Error} When translation fails
- * 
- * @example
- * try {
- *   const translatedArticles = await translateArticleInGerman(10);
- *   console.log(translatedArticles);
- * } catch (error) {
- *   console.error(error);
- * }
- */
-export async function translateArticleInGerman(LIMIT=DEFAULT_LIMIT) {
-  try {
-    const snapshot = await db.collectionGroup('articles').limit(LIMIT).get();
-    if (snapshot.empty) {
-      console.log('No articles found.');
-      return {message: 'No articles found.', count: 0};
-    }
-    const articles = snapshot.docs.map((doc) => ({id: doc.id, ...doc.data()}));
-    const translatedArticles = await Promise.all(
-      articles.map(async (article) => {
-        const translatedContent = await queueTranslation(article, 'de');
-        return translatedContent;
-      }),
-    );
-    return translatedArticles;
-  } catch (error) {
-    console.error('Error translating articles:', error);
-    throw new Error('Failed to translate articles.');
-  }
-}
-
+export { translateAndStoreArticles };
