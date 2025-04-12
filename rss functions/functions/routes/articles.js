@@ -6,10 +6,11 @@ import admin from 'firebase-admin';
 import checkApiKey from '../utils/auth.js';
 import { fetchAndStoreRssFeeds } from '../services/rssService.js';
 import { translateAndStoreArticles } from '../services/translationService.js';
+import { rewriteAndStoreArticles } from '../services/rewritingService.js';
 
 // Apply the API key middleware to these routes.
 router.use('/articles', checkApiKey);
-router.use('/rss', checkApiKey);
+//router.use('/rss', checkApiKey);
 router.use('/articles/:category', checkApiKey);
 router.use('/search', checkApiKey);
 router.use('/related', checkApiKey);
@@ -36,6 +37,18 @@ router.get('/translate', async (req, res) => {
   } catch (error) {
     console.error('Error in /translate endpoint:', error);
     res.status(500).json({error: 'Failed to start translation process'});
+  }
+});
+
+// GET /rewrite - Rewrite articles in different languages
+router.get('/rewrite', async (req, res) => {
+  try {
+    await rewriteAndStoreArticles();
+    res.set('Cache-Control', 'public, max-age=30');
+    res.json({message: 'Rewriting process started'});
+  } catch (error) {
+    console.error('Error in /rewrite endpoint:', error);
+    res.status(500).json({error: 'Failed to start rewriting process'});
   }
 });
 
