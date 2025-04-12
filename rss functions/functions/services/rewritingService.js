@@ -3,7 +3,9 @@ import { queueRewriting } from "../utils/article-rewriting/queueRewriting.js";
 
 const db = admin.firestore();
 
-const DEFAULT_LIMIT = 8;
+const DEFAULT_LIMIT = 5;
+const DELAY_MS = 2000; // 1 second delay between rewrites
+const DelayNode = () => new Promise(resolve => setTimeout(resolve, DELAY_MS));
 
 const TARGET_LANGUAGES = ["fr", "de", "es", "en"];
 
@@ -24,6 +26,7 @@ export async function rewriteAndStoreArticles() {
 
             // Process each target language
             for (const targetLang of TARGET_LANGUAGES) {
+                await DelayNode()
                 // Check if rewriting already exists in the rewrites collection
                 const rewriteID = `${articleId}-${targetLang}`;
                 const rewritingRef = db.collection('rewrites').doc(rewriteID);
@@ -34,7 +37,17 @@ export async function rewriteAndStoreArticles() {
                     const rewrittenArticle = await queueRewriting(
                         article,
                         targetLang
-                    );
+                    )
+                    .catch((error) => {
+                        if (error.status === 401 || error.status === 403) {
+                            console.log(`Skipping article ${articleId}`);
+                            return null;
+                        }
+                    });
+                    if (!rewrittenArticle) {
+                        console.error(`Failed to rewrite article ${articleId} to ${targetLang}`);
+                        continue; // Skip to the next language
+                    }
                     // Store rewritten version in language subcollection
                     await rewritingRef.set({
                         ...rewrittenArticle,
