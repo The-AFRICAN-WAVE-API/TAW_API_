@@ -1,5 +1,5 @@
 import { GoogleGenAI } from '@google/genai';
-import config from '../../../configuration/config.js';
+import config from '../../../config/config.js';
 
 const genai = new GoogleGenAI({
   apiKey: config.GEMINI_API_KEY,
@@ -62,11 +62,21 @@ export async function translate(text, targetLanguage) {
 
       const response = result.text;
       try {
-        JSON.parse(response);
-        return response;
+        const cleanResponse = response.replace(/^[`'"]+|[`'"]+$/g, '');
+        const parsedResponse = JSON.parse(cleanResponse);
+        return JSON.stringify(parsedResponse);
       } catch (jsonError) {
-        console.warn('Invalid JSON response:', response);
-        throw new Error('Invalid JSON in translation response');
+        const jsonMatch = response.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+        if (jsonMatch) {
+          try {
+            const extractedJson = jsonMatch[1].trim();
+            const parsedJson = JSON.parse(extractedJson);
+            return JSON.stringify(parsedJson);
+          } catch (error) {
+            console.warn('Invalid JSON response:', response);
+            throw new Error('Invalid JSON in translation response');
+          }
+        }
       }
     } catch (error) {
       if (error.status === 429) {
