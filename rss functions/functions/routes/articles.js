@@ -10,7 +10,7 @@ import { rewriteAndStoreArticles } from '../services/rewritingService.js';
 
 // Apply the API key middleware to these routes.
 router.use('/articles', checkApiKey);
-router.use('/rss', checkApiKey);
+//router.use('/rss', checkApiKey);
 router.use('/articles/:category', checkApiKey);
 router.use('/search', checkApiKey);
 router.use('/related', checkApiKey);
