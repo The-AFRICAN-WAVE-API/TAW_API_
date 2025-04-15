@@ -4,7 +4,7 @@ import { queueTranslation } from '../utils/languages/translationQueue.js';
 
 const DEFAULT_LIMIT = 10;
 
-const TARGET_LANGUAGES = ['fr', 'de', 'es'];
+const TARGET_LANGUAGES = ['fr', 'sw'];
 
 /**
  * Fetches articles from Firestore, translates them to target languages if translations don't exist,
