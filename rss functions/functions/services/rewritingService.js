@@ -7,7 +7,7 @@ const DEFAULT_LIMIT = 5;
 const DELAY_MS = 2000; // 1 second delay between rewrites
 const DelayNode = () => new Promise(resolve => setTimeout(resolve, DELAY_MS));
 
-const TARGET_LANGUAGES = ["fr", "de", "es", "en"];
+const TARGET_LANGUAGES = ["en", "sw"];
 
 export async function rewriteAndStoreArticles() {
     try {
