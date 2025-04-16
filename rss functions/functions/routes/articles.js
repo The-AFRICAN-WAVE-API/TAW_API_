@@ -5,7 +5,7 @@ const router = Router();
 import admin from 'firebase-admin';
 import checkApiKey from '../utils/auth.js';
 import { fetchAndStoreRssFeeds } from '../services/rssService.js';
-import { translateArticleInFrench, translateArticleInSpanish, translateArticleInGerman } from '../services/translationService.js';
+import { translateAndStoreArticles } from '../services/translationService.js';
 
 // Apply the API key middleware to these routes.
 router.use('/articles', checkApiKey);
@@ -24,6 +24,18 @@ router.get('/rss', async (req, res) => {
   } catch (error) {
     console.error('Error in /rss endpoint:', error);
     res.status(500).json({error: 'Failed to fetch and store RSS feeds'});
+  }
+});
+
+// GET /translate - Translate articles to different languages
+router.get('/translate', async (req, res) => {
+  try {
+    await translateAndStoreArticles();
+    res.set('Cache-Control', 'public, max-age=30');
+    res.json({message: 'Translation process started'});
+  } catch (error) {
+    console.error('Error in /translate endpoint:', error);
+    res.status(500).json({error: 'Failed to start translation process'});
   }
 });
 
@@ -120,40 +132,77 @@ router.get('/related', async (req, res) => {
   }
 });
 
-// GET /articles/french - Fetching article feed translated into french
+// GET /articles/french - Fetching articles translated to French
 router.get('/french/articles', async (req, res) => {
+  const db = admin.firestore();
   try {
-    const frenchArticles = await translateArticleInFrench();
-    res.status(200);
-    return res.json(frenchArticles);
+    const snapshot = await db.collectionGroup('fr')
+      .orderBy('translatedAt', 'desc')
+      .get();
+
+    if (snapshot.empty) {
+      return res.status(404).json({ message: 'No French translations found' });
+    }
+
+    const frenchArticles = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    res.status(200).json(frenchArticles);
   } catch (error) {
-    console.error('Error getting translated feed: ', error);
-    res.status(500).send('Something went wrong translating the feed');
+    console.error('Error getting French articles:', error);
+    res.status(500).json({ error: 'Failed to retrieve French articles' });
   }
 });
 
-// GET /articles/spanish - Fetching article feed translated into spanish
+// GET /articles/spanish - Fetching articles translated to Spanish
 router.get('/spanish/articles', async (req, res) => {
+  const db = admin.firestore();
   try {
-    const spanishArticles = await translateArticleInSpanish();
-    res.status(200);
-    return res.json(spanishArticles);
+    const snapshot = await db.collectionGroup('es')
+      .orderBy('translatedAt', 'desc')
+      .get();
+
+    if (snapshot.empty) {
+      return res.status(404).json({ message: 'No Spanish translations found' });
+    }
+
+    const spanishArticles = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    res.status(200).json(spanishArticles);
   } catch (error) {
-    console.error('Error getting translated feed: ', error);
-    res.status(500).send('Something went wrong translating the feed');
+    console.error('Error getting Spanish articles:', error);
+    res.status(500).json({ error: 'Failed to retrieve Spanish articles' });
   }
 });
 
-// GET /articles/german - Fetching article feed translated into german
+// GET /articles/german - Fetching articles translated to German
 router.get('/german/articles', async (req, res) => {
+  const db = admin.firestore();
   try {
-    const germanArticles = await translateArticleInGerman();
-    res.status(200);
-    return res.json(germanArticles);
+    const snapshot = await db.collectionGroup('de')
+      .orderBy('translatedAt', 'desc')
+      .get();
+
+    if (snapshot.empty) {
+      return res.status(404).json({ message: 'No German translations found' });
+    }
+
+    const germanArticles = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    res.status(200).json(germanArticles);
   } catch (error) {
-    console.error('Error getting translated feed: ', error);
-    res.status(500).send('Something went wrong translating the feed');
+    console.error('Error getting German articles:', error);
+    res.status(500).json({ error: 'Failed to retrieve German articles' });
   }
 });
+
 
 export default router;

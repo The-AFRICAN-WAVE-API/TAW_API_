@@ -3,7 +3,7 @@ import {throttleRequests} from '../utils/throttle.js';
 import feedUrls from '../feedUrls.js';
 import {categorizeArticleRuleBased, analyzeSentiment, analyzeEntities} from '../utils/analysis.js';
 import {getUniqueKey} from '../utils/helpers.js';
-import admin from '../configuration/firebase.js';
+import admin from '../config/firebase.js';
 import {detectLanguage} from '../utils/languages/languageDetection.js';
 const db = admin.firestore();
 
@@ -61,7 +61,7 @@ export async function fetchAndStoreRssFeeds() {
             entities,
             location: geoLocation,
             description: contentForAnalysis,
-            langage: detectedLanguage,
+            language: detectedLanguage,
             imageUrl,
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
           },

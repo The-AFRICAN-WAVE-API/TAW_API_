@@ -1,7 +1,7 @@
 // utils/throttle.js
 import Parser from 'rss-parser';
 const parser = new Parser();
-import config from '../configuration/config.js';
+import config from '../config/config.js';
 
 // In-memory cache for feeds
 const feedCache = {};
