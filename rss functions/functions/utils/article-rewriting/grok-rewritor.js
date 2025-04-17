@@ -10,6 +10,7 @@ const prompt = `
 > I will provide:
 > - An **article title**
 > - A **link to a source article** (URL)
+> - The **language** to rewrite the article in (default is English)
 
 > **Your task is to follow these steps precisely:**
 
@@ -56,16 +57,17 @@ const prompt = `
 
 > Title: {{title}}
 > Link: {{link}}
+> Language: {{targetLanguage}}
 
 `
 
-export async function getGrokResponse(title, link) {
+export async function getGrokResponse(title, link, targetLanguage) {
   const data = JSON.stringify({
     "model": "grok-3",
     "messages": [
       {
         "role": "user",
-        "content": prompt.replace("{{title}}", title).replace("{{link}}", link)
+        "content": prompt.replace("{{title}}", title).replace("{{link}}", link).replace("{{targetLanguage}}", targetLanguage)
       }
     ],
     "temperature": 0.7
