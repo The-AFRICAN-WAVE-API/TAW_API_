@@ -7,6 +7,7 @@ import checkApiKey from '../utils/auth.js';
 import { fetchAndStoreRssFeeds } from '../services/rssService.js';
 import { translateAndStoreArticles } from '../services/translationService.js';
 import { rewriteAndStoreArticles } from '../services/rewritingService.js';
+import nlp from 'compromise';
 
 // Apply the API key middleware to these routes.
 router.use('/articles', checkApiKey);
@@ -110,7 +111,6 @@ router.get('/search', async (req, res) => {
 // GET /related - Fetch related articles based on an article title
 router.get('/related', async (req, res) => {
   const db = admin.firestore();
-  const nlp = require('compromise');
   try {
     const {title} = req.query;
     if (!title) return res.status(400).json({error: 'Missing \'title\' query parameter.'});
