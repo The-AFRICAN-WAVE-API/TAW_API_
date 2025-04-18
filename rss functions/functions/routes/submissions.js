@@ -1,28 +1,37 @@
-const express = require('express');
-const router = express.Router();
-const {
+// functions/routes/submissions.js
+import express from 'express';
+import {
   createSubmission,
   listPending,
   approveSubmission,
-} = require('../services/submissionService');
+} from '../services/submissionService.js';
+import checkApiKey from '../utils/auth.js';
 
-// Route: Submit a new article for approval
+const router = express.Router();
+
+
+router.use('/submissions', checkApiKey);
+router.use('/submissions/pending', checkApiKey);
+router.use('/submissions/:id/approve', checkApiKey);
+
+
 // POST /submissions
 router.post('/submissions', async (req, res) => {
+  const { title, content, author } = req.body;
+  if (!title || !content || !author) {
+    return res.status(400).json({
+      error: 'Missing required fields: title, content, author'
+    });
+  }
   try {
-    const { title, content, author } = req.body;
-    if (!title || !content || !author) {
-      return res.status(400).json({ error: 'Missing required fields: title, content, author' });
-    }
-    const result = await createSubmission({ title, content, author });
-    res.status(201).json({ message: 'Submission created', id: result.id });
+    const { id } = await createSubmission({ title, content, author });
+    res.status(201).json({ message: 'Submission created', id });
   } catch (err) {
     console.error('Error creating submission:', err);
     res.status(500).json({ error: 'Failed to create submission' });
   }
 });
 
-// Route: List all pending submissions (admin)
 // GET /submissions/pending
 router.get('/submissions/pending', async (req, res) => {
   try {
@@ -34,7 +43,6 @@ router.get('/submissions/pending', async (req, res) => {
   }
 });
 
-// Route: Approve a pending submission
 // POST /submissions/:id/approve
 router.post('/submissions/:id/approve', async (req, res) => {
   try {
@@ -47,4 +55,4 @@ router.post('/submissions/:id/approve', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

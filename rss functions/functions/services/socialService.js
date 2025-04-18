@@ -3,9 +3,9 @@ import fetch from 'node-fetch';
 import { categorizeArticleRuleBased, analyzeSentiment, analyzeEntities } from '../utils/analysis.js';
 import { getUniqueKey } from '../utils/helpers.js';
 import { detectLanguage } from '../utils/languages/languageDetection.js';
-import admin from '../config/firebase.js';
+import admin from '../configuration/firebase.js';
 const db = admin.firestore();
-import config from '../config/config.js';
+import config from '../configuration/config.js';
 
 /**
  * Fetches popular social media posts based on popular hashtags.

@@ -1,4 +1,4 @@
-import admin from '../config/firebase.js';
+import admin from '../configuration/firebase.js';
 import { queueRewriting } from '../utils/article-rewriting/queueRewriting.js';
 
 const db = admin.firestore();
