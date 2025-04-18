@@ -84,10 +84,6 @@ export async function getGrokResponse(title, link, targetLanguage) {
     data: data
   };
 
-  try {
-    const response = await request(config);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
+  const response = await request(config);
+  return response.data;
 }
