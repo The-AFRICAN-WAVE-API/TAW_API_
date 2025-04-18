@@ -6,13 +6,21 @@ import admin from 'firebase-admin';
 import checkApiKey from '../utils/auth.js';
 import { fetchAndStoreRssFeeds } from '../services/rssService.js';
 import { translateAndStoreArticles } from '../services/translationService.js';
-
+import { rewriteAndStoreArticles } from '../services/rewritingService.js';
+import nlp from 'compromise';
+import { FieldPath } from 'firebase-admin/firestore';
 // Apply the API key middleware to these routes.
 router.use('/articles', checkApiKey);
 router.use('/rss', checkApiKey);
 router.use('/articles/:category', checkApiKey);
 router.use('/search', checkApiKey);
 router.use('/related', checkApiKey);
+router.use('/translate', checkApiKey);
+router.use('/rewrite', checkApiKey);
+router.use('/french/articles', checkApiKey);
+router.use('/spanish/articles', checkApiKey);
+router.use('/german/articles', checkApiKey);
+
 
 
 // GET /rss - Process RSS feeds and store them
@@ -39,19 +47,60 @@ router.get('/translate', async (req, res) => {
   }
 });
 
-// GET /articles - Retrieve all articles
-router.get('/articles', async (req, res) => {
-  const db = admin.firestore();
+// GET /rewrite - Rewrite articles in different languages
+router.get('/rewrite', async (req, res) => {
   try {
-    const snapshot = await db.collectionGroup('articles').orderBy('createdAt', 'desc').get();
-    const articles = snapshot.docs.map((doc) => ({id: doc.id, ...doc.data()}));
-    res.json(articles);
+    await rewriteAndStoreArticles();
+    res.set('Cache-Control', 'public, max-age=30');
+    res.json({message: 'Rewriting process started'});
   } catch (error) {
-    console.error('Error retrieving articles:', error);
-    res.status(500).json({error: 'Failed to retrieve articles'});
+    console.error('Error in /rewrite endpoint:', error);
+    res.status(500).json({error: 'Failed to start rewriting process'});
   }
 });
 
+// GET /articles - Retrieve all articles
+router.get('/articles', async (req, res) => {
+  const db = admin.firestore();
+
+  // Read pagination params (with defaults)
+  const pageSize  = Math.max(1, Math.min(100, parseInt(req.query.pageSize, 10) || 10));
+  const pageToken = req.query.pageToken; 
+
+  try {
+    // Build base query: order by timestamp and document ID for tiebreaker
+    let query = db
+      .collectionGroup('articles')
+      .orderBy('createdAt', 'desc')
+      .orderBy(FieldPath.documentId(), 'desc')
+      .limit(pageSize);
+
+    if (pageToken) {
+      const lastDocSnap = await db.doc(pageToken).get();
+      if (lastDocSnap.exists) {
+        query = query.startAfter(lastDocSnap);
+      } else {
+        return res.status(400).json({ error: 'Invalid pageToken' });
+      }
+    }
+
+    const snapshot = await query.get();
+    const articles = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    let nextPageToken = null;
+    if (snapshot.docs.length === pageSize) {
+      nextPageToken = snapshot.docs[pageSize - 1].ref.path;
+    }
+
+    res.json({ articles, nextPageToken });
+  } catch (error) {
+    console.error('Error retrieving paginated articles:', error);
+    res.status(500).json({ error: 'Failed to retrieve articles' });
+  }
+});
 // GET /articles/:category - Retrieve articles by category
 router.get('/articles/:category', async (req, res) => {
   const db = admin.firestore();
@@ -97,7 +146,6 @@ router.get('/search', async (req, res) => {
 // GET /related - Fetch related articles based on an article title
 router.get('/related', async (req, res) => {
   const db = admin.firestore();
-  const nlp = require('compromise');
   try {
     const {title} = req.query;
     if (!title) return res.status(400).json({error: 'Missing \'title\' query parameter.'});
