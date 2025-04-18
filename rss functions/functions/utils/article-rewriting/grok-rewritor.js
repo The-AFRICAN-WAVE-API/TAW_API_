@@ -59,18 +59,18 @@ const prompt = `
 > Link: {{link}}
 > Language: {{targetLanguage}}
 
-`
+`;
 
 export async function getGrokResponse(title, link, targetLanguage) {
   const data = JSON.stringify({
-    "model": "grok-3",
-    "messages": [
+    'model': 'grok-3',
+    'messages': [
       {
-        "role": "user",
-        "content": prompt.replace("{{title}}", title).replace("{{link}}", link).replace("{{targetLanguage}}", targetLanguage)
+        'role': 'user',
+        'content': prompt.replace('{{title}}', title).replace('{{link}}', link).replace('{{targetLanguage}}', targetLanguage)
       }
     ],
-    "temperature": 0.7
+    'temperature': 0.7
   });
 
   const config = {
