@@ -1,28 +1,28 @@
-// utils/analysis.js
 import nlp from 'compromise';
 import { positive, negative } from '../sentimentKeywords.js';
-import categoryKeywords from '../categoryKeywords.js';
+import natural from 'natural';
+import trainingData from './trainingData.json' assert { type: "json" };
+
+// Text Cleaning Function
+function cleanText(text) {
+  return text.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
+}
+
+// 🧠 Initialize and Train Classifier
+const classifier = new natural.LogisticRegressionClassifier();
+trainingData.forEach(data => classifier.addDocument(cleanText(data.text), data.category));
+classifier.train();
 
 /**
- * Categorizes content based on rule-based keyword matching.
+ * Categorizes content using ML (Logistic Regression).
  * @param {string} content - The text to categorize.
- * @return {string} The assigned category.
+ * @return {string} The predicted category.
  */
-export function categorizeArticleRuleBased(content) {
-  const lowerContent = content.toLowerCase();
-  let maxScore = 0;
-  let assignedCategory = 'Other';
-  for (const [category, keywords] of Object.entries(categoryKeywords)) {
-    let score = 0;
-    keywords.forEach((keyword) => {
-      if (lowerContent.includes(keyword.toLowerCase())) score++;
-    });
-    if (score > maxScore) {
-      maxScore = score;
-      assignedCategory = category;
-    }
-  }
-  return assignedCategory;
+export function categorizeArticleML(content) {
+  const cleaned = cleanText(content);
+  const classifications = classifier.getClassifications(cleaned);
+  const topPrediction = classifications[0];
+  return topPrediction ? topPrediction.label : 'misc'; 
 }
 
 /**
@@ -58,4 +58,3 @@ export async function analyzeEntities(text) {
     organizations: doc.organizations().out('array'),
   };
 }
-
