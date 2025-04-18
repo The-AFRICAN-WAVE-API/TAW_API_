@@ -18,6 +18,7 @@ router.use('/related', checkApiKey);
 router.use('/translate', checkApiKey);
 router.use('/rewrite', checkApiKey);
 router.use('/french/articles', checkApiKey);
+router.use('/swahili/articles', checkApiKey);
 router.use('/spanish/articles', checkApiKey);
 router.use('/german/articles', checkApiKey);
 
@@ -40,7 +41,7 @@ router.get('/translate', async (req, res) => {
   try {
     await translateAndStoreArticles();
     res.set('Cache-Control', 'public, max-age=30');
-    res.json({message: 'Translation process started'});
+    res.json({message: 'Translation process completed'});
   } catch (error) {
     console.error('Error in /translate endpoint:', error);
     res.status(500).json({error: 'Failed to start translation process'});
@@ -52,7 +53,7 @@ router.get('/rewrite', async (req, res) => {
   try {
     await rewriteAndStoreArticles();
     res.set('Cache-Control', 'public, max-age=30');
-    res.json({message: 'Rewriting process started'});
+    res.json({message: 'Rewriting process completed'});
   } catch (error) {
     console.error('Error in /rewrite endpoint:', error);
     res.status(500).json({error: 'Failed to start rewriting process'});
@@ -183,10 +184,29 @@ router.get('/related', async (req, res) => {
 // GET /articles/french - Fetching articles translated to French
 router.get('/french/articles', async (req, res) => {
   const db = admin.firestore();
+  
+  // Read pagination params (with defaults)
+  const pageSize = Math.max(1, Math.min(100, parseInt(req.query.pageSize, 10) || 10));
+  const pageToken = req.query.pageToken;
+
   try {
-    const snapshot = await db.collectionGroup('fr')
+    // Build base query
+    let query = db.collectionGroup('fr')
       .orderBy('translatedAt', 'desc')
-      .get();
+      .orderBy(FieldPath.documentId(), 'desc')
+      .limit(pageSize);
+
+    // Apply pagination token if provided
+    if (pageToken) {
+      const lastDocSnap = await db.doc(pageToken).get();
+      if (lastDocSnap.exists) {
+        query = query.startAfter(lastDocSnap);
+      } else {
+        return res.status(400).json({ error: 'Invalid pageToken' });
+      }
+    }
+
+    const snapshot = await query.get();
 
     if (snapshot.empty) {
       return res.status(404).json({ message: 'No French translations found' });
@@ -197,20 +217,94 @@ router.get('/french/articles', async (req, res) => {
       ...doc.data()
     }));
 
-    res.status(200).json(frenchArticles);
+    // Get next page token if there are more results
+    let nextPageToken = null;
+    if (snapshot.docs.length === pageSize) {
+      nextPageToken = snapshot.docs[pageSize - 1].ref.path;
+    }
+
+    res.status(200).json({ articles: frenchArticles, nextPageToken });
   } catch (error) {
     console.error('Error getting French articles:', error);
     res.status(500).json({ error: 'Failed to retrieve French articles' });
   }
 });
 
+// GET /articles/swahili - Fetching articles translated to Swahili
+router.get('/swahili/articles', async (req, res) => {
+  const db = admin.firestore();
+  
+  // Read pagination params (with defaults)
+  const pageSize = Math.max(1, Math.min(100, parseInt(req.query.pageSize, 10) || 10));
+  const pageToken = req.query.pageToken;
+
+  try {
+    // Build base query
+    let query = db.collectionGroup('sw')
+      .orderBy('translatedAt', 'desc')
+      .orderBy(FieldPath.documentId(), 'desc')
+      .limit(pageSize);
+
+    // Apply pagination token if provided
+    if (pageToken) {
+      const lastDocSnap = await db.doc(pageToken).get();
+      if (lastDocSnap.exists) {
+        query = query.startAfter(lastDocSnap);
+      } else {
+        return res.status(400).json({ error: 'Invalid pageToken' });
+      }
+    }
+
+    const snapshot = await query.get();
+
+    if (snapshot.empty) {
+      return res.status(404).json({ message: 'No Swahili translations found' });
+    }
+
+    const swahiliArticles = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    // Get next page token if there are more results
+    let nextPageToken = null;
+    if (snapshot.docs.length === pageSize) {
+      nextPageToken = snapshot.docs[pageSize - 1].ref.path;
+    }
+
+    res.status(200).json({ articles: swahiliArticles, nextPageToken });
+  } catch (error) {
+    console.error('Error getting Swahili articles:', error);
+    res.status(500).json({ error: 'Failed to retrieve Swahili articles' });
+  }
+});
+
 // GET /articles/spanish - Fetching articles translated to Spanish
 router.get('/spanish/articles', async (req, res) => {
   const db = admin.firestore();
+  
+  // Read pagination params (with defaults)
+  const pageSize = Math.max(1, Math.min(100, parseInt(req.query.pageSize, 10) || 10));
+  const pageToken = req.query.pageToken;
+
   try {
-    const snapshot = await db.collectionGroup('es')
+    // Build base query
+    let query = db.collectionGroup('es')
       .orderBy('translatedAt', 'desc')
-      .get();
+      .orderBy(FieldPath.documentId(), 'desc')
+      .limit(pageSize);
+
+    // Apply pagination token if provided
+    if (pageToken) {
+      const lastDocSnap = await db.doc(pageToken).get();
+      if (lastDocSnap.exists) {
+        query = query.startAfter(lastDocSnap);
+      } else {
+        return res.status(400).json({ error: 'Invalid pageToken' });
+      }
+    }
+
+    const snapshot = await query.get();
 
     if (snapshot.empty) {
       return res.status(404).json({ message: 'No Spanish translations found' });
@@ -221,7 +315,13 @@ router.get('/spanish/articles', async (req, res) => {
       ...doc.data()
     }));
 
-    res.status(200).json(spanishArticles);
+    // Get next page token if there are more results
+    let nextPageToken = null;
+    if (snapshot.docs.length === pageSize) {
+      nextPageToken = snapshot.docs[pageSize - 1].ref.path;
+    }
+
+    res.status(200).json({ articles: spanishArticles, nextPageToken });
   } catch (error) {
     console.error('Error getting Spanish articles:', error);
     res.status(500).json({ error: 'Failed to retrieve Spanish articles' });
@@ -231,10 +331,29 @@ router.get('/spanish/articles', async (req, res) => {
 // GET /articles/german - Fetching articles translated to German
 router.get('/german/articles', async (req, res) => {
   const db = admin.firestore();
+  
+  // Read pagination params (with defaults)
+  const pageSize = Math.max(1, Math.min(100, parseInt(req.query.pageSize, 10) || 10));
+  const pageToken = req.query.pageToken;
+
   try {
-    const snapshot = await db.collectionGroup('de')
+    // Build base query
+    let query = db.collectionGroup('de')
       .orderBy('translatedAt', 'desc')
-      .get();
+      .orderBy(FieldPath.documentId(), 'desc')
+      .limit(pageSize);
+
+    // Apply pagination token if provided
+    if (pageToken) {
+      const lastDocSnap = await db.doc(pageToken).get();
+      if (lastDocSnap.exists) {
+        query = query.startAfter(lastDocSnap);
+      } else {
+        return res.status(400).json({ error: 'Invalid pageToken' });
+      }
+    }
+
+    const snapshot = await query.get();
 
     if (snapshot.empty) {
       return res.status(404).json({ message: 'No German translations found' });
@@ -245,7 +364,13 @@ router.get('/german/articles', async (req, res) => {
       ...doc.data()
     }));
 
-    res.status(200).json(germanArticles);
+    // Get next page token if there are more results
+    let nextPageToken = null;
+    if (snapshot.docs.length === pageSize) {
+      nextPageToken = snapshot.docs[pageSize - 1].ref.path;
+    }
+
+    res.status(200).json({ articles: germanArticles, nextPageToken });
   } catch (error) {
     console.error('Error getting German articles:', error);
     res.status(500).json({ error: 'Failed to retrieve German articles' });
