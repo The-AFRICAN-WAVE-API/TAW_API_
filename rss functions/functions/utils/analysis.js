@@ -1,7 +1,8 @@
 import nlp from 'compromise';
 import { positive, negative } from '../sentimentKeywords.js';
 import natural from 'natural';
-import trainingData from './trainingData.json' assert { type: "json" };
+import trainingData from './trainingData.js';
+
 
 // Text Cleaning Function
 function cleanText(text) {
