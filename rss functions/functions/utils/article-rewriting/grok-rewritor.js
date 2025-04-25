@@ -85,6 +85,10 @@ export async function getGrokResponse(title, link, targetLanguage) {
     data: data
   };
 
-  const response = await request(configa);
+  const response = await request(configa)
+    .catch((error) => {
+      console.error('Error in Grok API request:', error);
+      throw new Error('Failed to fetch response from Grok API.');
+    });
   return response.data;
 }
