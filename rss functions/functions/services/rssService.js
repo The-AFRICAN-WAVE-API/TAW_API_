@@ -1,7 +1,7 @@
 // services/rssService.js
 import {throttleRequests} from '../utils/throttle.js';
 import feedUrls from '../feedUrls.js';
-import {categorizeArticleRuleBased, analyzeSentiment, analyzeEntities, categorizeArticleML} from '../utils/analysis.js';
+import {analyzeSentiment, analyzeEntities, categorizeArticleML} from '../utils/analysis.js';
 import {getUniqueKey} from '../utils/helpers.js';
 import admin from '../configuration/firebase.js';
 import {detectLanguage} from '../utils/languages/languageDetection.js';
@@ -36,9 +36,7 @@ export async function fetchAndStoreRssFeeds() {
     if (!feed || !feed.items) continue;
     const processedItems = await Promise.all(
       feed.items.map(async (item) => {
-        const contentForAnalysis =
-          item['content:encoded'] || item.content || item.description || item.contentSnippet || '';
-        const category = categorizeArticleRuleBased(contentForAnalysis);
+        const contentForAnalysis = item['content:encoded'] || item.content || item.description || item.contentSnippet || '';
         const categoryML = categorizeArticleML(contentForAnalysis);
           
         const sentiment = analyzeSentiment(contentForAnalysis);
@@ -67,7 +65,6 @@ export async function fetchAndStoreRssFeeds() {
             link: item.link,
             pubDate: item.pubDate || null,
             source: feed.title,
-            category,
             categoryML,
             sentiment,
             entities,
