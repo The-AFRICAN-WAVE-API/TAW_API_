@@ -1,6 +1,6 @@
 // services/socialService.js
 import fetch from 'node-fetch';
-import { categorizeArticleRuleBased, analyzeSentiment, analyzeEntities } from '../utils/analysis.js';
+import { analyzeSentiment, analyzeEntities } from '../utils/analysis.js';
 import { getUniqueKey } from '../utils/helpers.js';
 import { detectLanguage } from '../utils/languages/languageDetection.js';
 import admin from '../configuration/firebase.js';
@@ -95,8 +95,7 @@ export async function processAndStoreSocialPosts() {
   let operationCount = 0;
 
   for (const post of posts) {
-    const contentForAnalysis = post.text || '';
-    const category = categorizeArticleRuleBased(contentForAnalysis);
+    const contentForAnalysis = post.text || '';;
     const sentiment = analyzeSentiment(contentForAnalysis);
     let entities = {};
     try {
@@ -124,7 +123,6 @@ export async function processAndStoreSocialPosts() {
       link: `https://twitter.com/i/web/status/${post.id}`,
       pubDate: new Date().toISOString(),
       source: 'Twitter',
-      category,
       sentiment,
       entities,
       location: geoLocation,
