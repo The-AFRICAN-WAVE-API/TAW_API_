@@ -32,7 +32,7 @@ router.get('/rss', async (req, res) => {
     res.json(result);
   } catch (error) {
     console.error('Error in /rss endpoint:', error);
-    res.status(500).json({error: 'Failed to fetch and store RSS feeds'});
+    res.status(500).json({ error: 'Failed to fetch and store RSS feeds' });
   }
 });
 
@@ -41,10 +41,10 @@ router.get('/translate', async (req, res) => {
   try {
     await translateAndStoreArticles();
     res.set('Cache-Control', 'public, max-age=30');
-    res.json({message: 'Translation process completed'});
+    res.json({ message: 'Translation process completed' });
   } catch (error) {
     console.error('Error in /translate endpoint:', error);
-    res.status(500).json({error: 'Failed to start translation process'});
+    res.status(500).json({ error: 'Failed to start translation process' });
   }
 });
 
@@ -53,10 +53,10 @@ router.get('/rewrite', async (req, res) => {
   try {
     await rewriteAndStoreArticles();
     res.set('Cache-Control', 'public, max-age=30');
-    res.json({message: 'Rewriting process completed'});
+    res.json({ message: 'Rewriting process completed' });
   } catch (error) {
     console.error('Error in /rewrite endpoint:', error);
-    res.status(500).json({error: 'Failed to start rewriting process'});
+    res.status(500).json({ error: 'Failed to start rewriting process' });
   }
 });
 
@@ -64,18 +64,20 @@ router.get('/rewrite', async (req, res) => {
 router.get('/articles', async (req, res) => {
   const db = admin.firestore();
 
-  // Read pagination params (with defaults)
-  const pageSize  = Math.max(1, Math.min(100, parseInt(req.query.pageSize, 10) || 10));
-  const pageToken = req.query.pageToken; 
+  // 1. Using pageSize and pageToken for pagination
+  const pageSize = Math.max(1, Math.min(100, parseInt(req.query.pageSize, 10) || 10));
+  const pageToken = req.query.pageToken;
 
   try {
-    // Build base query: order by timestamp and document ID for tiebreaker
+    // 2. Fetching only required fields (projection) in the query
     let query = db
       .collectionGroup('articles')
       .orderBy('createdAt', 'desc')
       .orderBy(FieldPath.documentId(), 'desc')
-      .limit(pageSize);
+      .limit(pageSize)
+      .select('title', 'link', 'category', 'createdAt', 'source', 'sentiment', 'pubDate', 'description');
 
+    // 3. If pageToken is provided, fetch data after that (pagination)
     if (pageToken) {
       const lastDocSnap = await db.doc(pageToken).get();
       if (lastDocSnap.exists) {
@@ -85,35 +87,63 @@ router.get('/articles', async (req, res) => {
       }
     }
 
+    // 4. Fetching data from query
     const snapshot = await query.get();
     const articles = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
 
+    // 5. Creating nextPageToken for next page
     let nextPageToken = null;
     if (snapshot.docs.length === pageSize) {
       nextPageToken = snapshot.docs[pageSize - 1].ref.path;
     }
 
+    // 6. Adding Cache-Control header
+    res.set('Cache-Control', 'public, max-age=30');
     res.json({ articles, nextPageToken });
   } catch (error) {
-    console.error('Error retrieving paginated articles:', error);
+    // 7. Keeping error message simple
+    console.error('Error retrieving paginated articles:', error.message);
     res.status(500).json({ error: 'Failed to retrieve articles' });
   }
 });
+
 // GET /articles/:category - Retrieve articles by category
 router.get('/articles/:category', async (req, res) => {
   const db = admin.firestore();
+  // Using pagination, projection, and cache header for category articles
+  const pageSize = Math.max(1, Math.min(100, parseInt(req.query.pageSize, 10) || 10));
+  const pageToken = req.query.pageToken;
   try {
-    let {category} = req.params;
+    let { category } = req.params;
     category = category.charAt(0).toUpperCase() + category.slice(1).toLowerCase();
-    const snapshot = await db.collection('rss_articles').doc(category).collection('articles').orderBy('createdAt', 'desc').get();
-    const articles = snapshot.docs.map((doc) => ({id: doc.id, ...doc.data()}));
-    res.json(articles);
+    // Query with projection and limit
+    let query = db.collection('rss_articles').doc(category).collection('articles')
+      .orderBy('createdAt', 'desc')
+      .limit(pageSize)
+      .select('title', 'link', 'category', 'createdAt', 'source', 'sentiment', 'pubDate', 'description');
+    // Pagination
+    if (pageToken) {
+      const lastDocSnap = await db.doc(pageToken).get();
+      if (lastDocSnap.exists) {
+        query = query.startAfter(lastDocSnap);
+      } else {
+        return res.status(400).json({ error: 'Invalid pageToken' });
+      }
+    }
+    const snapshot = await query.get();
+    const articles = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    let nextPageToken = null;
+    if (snapshot.docs.length === pageSize) {
+      nextPageToken = snapshot.docs[pageSize - 1].ref.path;
+    }
+    res.set('Cache-Control', 'public, max-age=30');
+    res.json({ articles, nextPageToken });
   } catch (error) {
-    console.error(`Error retrieving articles for category ${req.params.category}:`, error);
-    res.status(500).json({error: 'Failed to retrieve articles by category'});
+    console.error(`Error retrieving articles for category ${req.params.category}:`, error.message);
+    res.status(500).json({ error: 'Failed to retrieve articles by category' });
   }
 });
 
@@ -121,26 +151,35 @@ router.get('/articles/:category', async (req, res) => {
 router.get('/search', async (req, res) => {
   const db = admin.firestore();
   try {
+    // 1. Extracting keywords
     const keywords = Object.values(req.query).map((kw) => kw.toLowerCase()).filter(Boolean);
     if (keywords.length === 0) {
-      return res.status(400).json({error: 'Missing query parameter. Provide at least one keyword.'});
+      return res.status(400).json({ error: 'Missing query parameter. Provide at least one keyword.' });
     }
-    const snapshot = await db.collectionGroup('articles').get();
+    // 2. Fetching only required fields and limiting results
+    const snapshot = await db.collectionGroup('articles')
+      .select('title', 'link', 'category', 'createdAt', 'source', 'sentiment', 'pubDate', 'description')
+      .limit(100)
+      .get();
     if (snapshot.empty) {
-      return res.status(404).json({error: 'No articles found.'});
+      return res.status(404).json({ error: 'No articles found.' });
     }
-    const articles = snapshot.docs.map((doc) => ({id: doc.id, ...doc.data()}));
+    // 3. Filtering data by keywords
+    const articles = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     const filteredArticles = articles.filter((article) => {
-      const text = ((article.title || '') + ' ' + (article.link || '') + ' ' + (article.source || '') + ' ' + (article.category || '') + ' ' + (article.sentiment || '')).toLowerCase();
+      const text = ((article.title || '') + ' ' + (article.link || '') + ' ' + (article.source || '') + ' ' + (article.category || '') + ' ' + (article.sentiment || '') + ' ' + (article.description || '')).toLowerCase();
       return keywords.some((keyword) => text.includes(keyword));
     });
     if (filteredArticles.length === 0) {
-      return res.status(404).json({error: 'No matching articles found.'});
+      return res.status(404).json({ error: 'No matching articles found.' });
     }
+    // 4. Adding Cache-Control header
+    res.set('Cache-Control', 'public, max-age=30');
     res.json(filteredArticles);
   } catch (error) {
-    console.error('Error searching for articles:', error);
-    res.status(500).json({error: 'Failed to search for articles'});
+    // 5. Keeping error message simple
+    console.error('Error searching for articles:', error.message);
+    res.status(500).json({ error: 'Failed to search for articles' });
   }
 });
 
@@ -148,19 +187,28 @@ router.get('/search', async (req, res) => {
 router.get('/related', async (req, res) => {
   const db = admin.firestore();
   try {
-    const {title} = req.query;
-    if (!title) return res.status(400).json({error: 'Missing \'title\' query parameter.'});
-    const originalSnap = await db.collectionGroup('articles').where('title', '==', title).get();
-    if (originalSnap.empty) return res.status(404).json({error: 'Original article not found.'});
+    const { title } = req.query;
+    if (!title) return res.status(400).json({ error: 'Missing \'title\' query parameter.' });
+    // Only fetching required fields for original article
+    const originalSnap = await db.collectionGroup('articles')
+      .where('title', '==', title)
+      .select('title', 'description', 'pubDate')
+      .limit(1)
+      .get();
+    if (originalSnap.empty) return res.status(404).json({ error: 'Original article not found.' });
     const originalDoc = originalSnap.docs[0];
     const originalArticle = originalDoc.data();
     const textForKeywords = originalArticle.description || originalArticle.title || '';
     const doc = nlp(textForKeywords);
     let keywords = doc.nouns().out('array');
     keywords = [...new Set(keywords.map((word) => word.toLowerCase()).filter((word) => word.length > 3))];
-    const snapshotAll = await db.collectionGroup('articles').get();
-    if (snapshotAll.empty) return res.status(404).json({error: 'No articles found.'});
-    let articles = snapshotAll.docs.map((doc) => ({id: doc.id, ...doc.data()}));
+    // Only fetching required fields for all articles, limited to 200 for performance
+    const snapshotAll = await db.collectionGroup('articles')
+      .select('title', 'description', 'pubDate')
+      .limit(200)
+      .get();
+    if (snapshotAll.empty) return res.status(404).json({ error: 'No articles found.' });
+    let articles = snapshotAll.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     articles = articles.filter((article) => article.title !== title);
     const relatedArticles = articles.filter((article) => {
       const text = ((article.title || '') + ' ' + (article.description || '')).toLowerCase();
@@ -170,21 +218,22 @@ router.get('/related', async (req, res) => {
     const historicalArticles = articles
       .filter((article) => new Date(article.pubDate) < originalDate)
       .sort((a, b) => new Date(a.pubDate) - new Date(b.pubDate));
+    res.set('Cache-Control', 'public, max-age=30');
     res.json({
       originalArticle,
       relatedArticles,
       historicalArticles,
     });
   } catch (error) {
-    console.error('Error fetching related articles:', error);
-    res.status(500).json({error: 'Failed to fetch related articles'});
+    console.error('Error fetching related articles:', error.message);
+    res.status(500).json({ error: 'Failed to fetch related articles' });
   }
 });
 
 // GET /articles/french - Fetching articles translated to French
 router.get('/french/articles', async (req, res) => {
   const db = admin.firestore();
-  
+
   // Read pagination params (with defaults)
   const pageSize = Math.max(1, Math.min(100, parseInt(req.query.pageSize, 10) || 10));
   const pageToken = req.query.pageToken;
@@ -233,7 +282,7 @@ router.get('/french/articles', async (req, res) => {
 // GET /articles/swahili - Fetching articles translated to Swahili
 router.get('/swahili/articles', async (req, res) => {
   const db = admin.firestore();
-  
+
   // Read pagination params (with defaults)
   const pageSize = Math.max(1, Math.min(100, parseInt(req.query.pageSize, 10) || 10));
   const pageToken = req.query.pageToken;
@@ -282,7 +331,7 @@ router.get('/swahili/articles', async (req, res) => {
 // GET /articles/spanish - Fetching articles translated to Spanish
 router.get('/spanish/articles', async (req, res) => {
   const db = admin.firestore();
-  
+
   // Read pagination params (with defaults)
   const pageSize = Math.max(1, Math.min(100, parseInt(req.query.pageSize, 10) || 10));
   const pageToken = req.query.pageToken;
@@ -331,7 +380,7 @@ router.get('/spanish/articles', async (req, res) => {
 // GET /articles/german - Fetching articles translated to German
 router.get('/german/articles', async (req, res) => {
   const db = admin.firestore();
-  
+
   // Read pagination params (with defaults)
   const pageSize = Math.max(1, Math.min(100, parseInt(req.query.pageSize, 10) || 10));
   const pageToken = req.query.pageToken;
