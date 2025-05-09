@@ -1,8 +1,11 @@
 // utils/auth.js
 const API_KEY = process.env.API_KEY;
 
-// Alternatively, if using Option B, import from your config file:
-// const { API_KEY } = require('../config/config');
+// Ensure API_KEY is defined during application startup
+if (!API_KEY) {
+  console.error("API_KEY is not defined in the environment variables.");
+  process.exit(1);
+}
 
 /**
  * Middleware to validate the API key.
@@ -13,12 +16,17 @@ const API_KEY = process.env.API_KEY;
  * @return {void}
  */
 function checkApiKey(req, res, next) {
-  const apiKeyHeader = req.headers['x-api-key'];
+  const apiKeyHeader = req.headers["x-api-key"] || req.headers["X-API-KEY"];
+
   if (!apiKeyHeader) {
-    return res.status(401).json({error: 'API key required'});
+    return res
+      .status(401)
+      .json({ success: false, message: "API key required" });
   }
   if (apiKeyHeader !== API_KEY) {
-    return res.status(401).json({error: 'Unauthorized: Invalid API key'});
+    return res
+      .status(401)
+      .json({ success: false, message: "Unauthorized: Invalid API key" });
   }
   next();
 }

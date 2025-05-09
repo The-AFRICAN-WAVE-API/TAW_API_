@@ -1,10 +1,14 @@
 // services/rssService.js
-import {throttleRequests} from '../utils/throttle.js';
-import feedUrls from '../feedUrls.js';
-import {analyzeSentiment, analyzeEntities, categorizeArticleML} from '../utils/analysis.js';
-import {getUniqueKey} from '../utils/helpers.js';
-import admin from '../configuration/firebase.js';
-import {detectLanguage} from '../utils/languages/languageDetection.js';
+import { throttleRequests } from "../utils/throttle.js";
+import feedUrls from "../feedUrls.js";
+import {
+  analyzeSentiment,
+  analyzeEntities,
+  categorizeArticleML,
+} from "../utils/analysis.js";
+import { getUniqueKey } from "../utils/helpers.js";
+import admin from "../configuration/firebase.js";
+import { detectLanguage } from "../utils/languages/languageDetection.js";
 const db = admin.firestore();
 
 /**
@@ -14,7 +18,7 @@ const db = admin.firestore();
  */
 function extractImageUrl(item) {
   if (item.enclosure && item.enclosure.url) return item.enclosure.url;
-  const imgMatch = item.content?.match(/<img[^>]+src="([^">]+)"/i);
+  const imgMatch = item.content?.match(/<img[^>]+src=['"]([^'">]+)['"]/i);
   if (imgMatch && imgMatch[1]) return imgMatch[1];
   return null;
 }
@@ -36,24 +40,32 @@ export async function fetchAndStoreRssFeeds() {
     if (!feed || !feed.items) continue;
     const processedItems = await Promise.all(
       feed.items.map(async (item) => {
-        const contentForAnalysis = item['content:encoded'] || item.content || item.description || item.contentSnippet || '';
+        const contentForAnalysis =
+          item["content:encoded"] ||
+          item.content ||
+          item.description ||
+          item.contentSnippet ||
+          "";
         const categoryML = categorizeArticleML(contentForAnalysis);
-          
+
         const sentiment = analyzeSentiment(contentForAnalysis);
         let entities = {};
         try {
           entities = await analyzeEntities(contentForAnalysis);
         } catch (e) {
-          console.error('Entity analysis failed for article:', item.title, e);
+          console.error("Entity analysis failed for article:", item.title, e);
         }
         let geoLocation = null;
-        if (item['geo:lat'] && item['geo:long']) {
-          geoLocation = {lat: parseFloat(item['geo:lat']), lng: parseFloat(item['geo:long'])};
+        if (item["geo:lat"] && item["geo:long"]) {
+          geoLocation = {
+            lat: parseFloat(item["geo:lat"]),
+            lng: parseFloat(item["geo:long"]),
+          };
         } else if (entities.places && entities.places.length > 0) {
           geoLocation = entities.places[0];
         }
 
-        const imageUrl = extractImageUrl(item);  // <-- updated image logic here
+        const imageUrl = extractImageUrl(item); // <-- updated image logic here
         // Language detection and translation (if needed)
         const detectedLanguage = detectLanguage(contentForAnalysis);
         // Duplicate checking: using the unique key as the Firestore doc ID prevents duplicate entries.
@@ -75,18 +87,24 @@ export async function fetchAndStoreRssFeeds() {
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
           },
         };
-      }),
+      })
     );
-    for (const {uniqueKey, data} of processedItems) {
-      const collectionRef = db.collection('rss_articles').doc(data.category).collection('articles');
+    for (const { uniqueKey, data } of processedItems) {
+      const collectionRef = db
+        .collection("rss_articles")
+        .doc(data.category)
+        .collection("articles");
       const docRef = collectionRef.doc(uniqueKey);
 
       // Upsert operation: If a document with uniqueKey already exists, this will update it (preventing duplicates)
-      batch.set(docRef, data, {merge: true});
+      batch.set(docRef, data, { merge: true });
       operationCount++;
       if (operationCount >= MAX_BATCH_SIZE) {
         await batch.commit();
-        console.log('Committed a batch of RSS articles, count:', operationCount);
+        console.log(
+          "Committed a batch of RSS articles, count:",
+          operationCount
+        );
         batch = db.batch();
         operationCount = 0;
       }
@@ -94,7 +112,10 @@ export async function fetchAndStoreRssFeeds() {
   }
   if (operationCount > 0) {
     await batch.commit();
-    console.log('Final batch commit executed for RSS articles, remaining count:', operationCount);
+    console.log(
+      "Final batch commit executed for RSS articles, remaining count:",
+      operationCount
+    );
   }
-  return {message: 'RSS feeds stored successfully', count: feeds.length};
+  return { message: "RSS feeds stored successfully", count: feeds.length };
 }

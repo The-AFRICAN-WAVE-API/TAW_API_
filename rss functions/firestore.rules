@@ -1,9 +1,9 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if false;
+    match /rss_articles/{document=**} {
+      allow read: if request.auth != null;  // Allow read if user is authenticated
+      allow write: if false;  // Disable writes for now since we're only reading
     }
   }
 }
