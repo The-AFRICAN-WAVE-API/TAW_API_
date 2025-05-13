@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image Scraper Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-functions-compat.min.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        line-height: 1.6;
+      }
+
+      .controls {
+        margin-bottom: 20px;
+        padding: 15px;
+        background-color: #f5f5f5;
+        border-radius: 5px;
+      }
+
+      input[type="url"] {
+        width: 70%;
+        padding: 8px;
+        margin-right: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+
+      button {
+        padding: 8px 15px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #45a049;
+      }
+
+      #results {
+        margin-top: 20px;
+      }
+
+      .result-card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        overflow: hidden;
+      }
+
+      .strategy-header {
+        background-color: #f8f8f8;
+        padding: 10px 15px;
+        border-bottom: 1px solid #ddd;
+      }
+
+      .image-container {
+        padding: 15px;
+      }
+
+      .image-container img {
+        max-width: 100%;
+        height: auto;
+        border: 1px solid #eee;
+        border-radius: 4px;
+      }
+
+      .error {
+        color: #d32f2f;
+        background-color: #ffebee;
+        padding: 10px;
+        border-radius: 4px;
+        margin: 10px 0;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+        font-style: italic;
+      }
+
+      .debug-info {
+        font-family: monospace;
+        background-color: #f5f5f5;
+        padding: 10px;
+        border-radius: 4px;
+        margin-top: 10px;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Image Scraper Test</h1>
+
+    <div class="controls">
+      <input
+        type="url"
+        id="urlInput"
+        placeholder="Enter URL to scrape images from..."
+      />
+      <button id="scrapeButton">Scrape Images</button>
+      <button id="clearButton">Clear Results</button>
+    </div>
+
+    <div id="status" class="loading" style="display: none">
+      Scraping images...
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+      // Initialize Firebase
+      const firebaseConfig = {
+        apiKey: "AIzaSyCtIB2Aw3NF3Uh6QLGWfv26RS6EFcYVX40",
+        authDomain: "news-api-f1a79.firebaseapp.com",
+        projectId: "news-api-f1a79",
+        storageBucket: "news-api-f1a79.appspot.com",
+        messagingSenderId: "497185017222",
+        appId: "1:497185017222:web:9c7f4dfe4abdba3eae90a2",
+      };
+
+      firebase.initializeApp(firebaseConfig);
+
+      // Get DOM elements
+      const urlInput = document.getElementById("urlInput");
+      const scrapeButton = document.getElementById("scrapeButton");
+      const clearButton = document.getElementById("clearButton");
+      const statusElement = document.getElementById("status");
+      const resultsElement = document.getElementById("results");
+
+      // Handle scraping
+      async function scrapeImages() {
+        const url = urlInput.value.trim();
+        if (!url) {
+          alert("Please enter a URL");
+          return;
+        }
+
+        statusElement.style.display = "block";
+
+        try {
+          // Call your Firebase Function
+          const scrapeFunction = firebase
+            .functions()
+            .httpsCallable("scrapeImages");
+          const result = await scrapeFunction({ url });
+
+          displayResults(result.data);
+        } catch (error) {
+          console.error("Scraping failed:", error);
+          resultsElement.innerHTML = `
+                    <div class="error">
+                        Error scraping images: ${error.message}
+                    </div>
+                `;
+        } finally {
+          statusElement.style.display = "none";
+        }
+      }
+
+      // Display results
+      function displayResults(data) {
+        resultsElement.innerHTML = "";
+
+        if (
+          !data ||
+          (!data.structuredData &&
+            !data.metaTags &&
+            !data.featuredImages &&
+            !data.contentImages)
+        ) {
+          resultsElement.innerHTML = '<div class="error">No images found</div>';
+          return;
+        }
+
+        // Display structured data results
+        if (data.structuredData) {
+          addResultCard("Structured Data (JSON-LD)", data.structuredData);
+        }
+
+        // Display meta tags results
+        if (data.metaTags && data.metaTags.length) {
+          addResultCard(
+            "Meta Tags (OpenGraph/Twitter)",
+            data.metaTags[0],
+            data.metaTags
+          );
+        }
+
+        // Display featured image results
+        if (data.featuredImages && data.featuredImages.length) {
+          addResultCard(
+            "Featured Images",
+            data.featuredImages[0],
+            data.featuredImages
+          );
+        }
+
+        // Display content images results
+        if (data.contentImages && data.contentImages.length) {
+          addResultCard(
+            "Content Images",
+            data.contentImages[0],
+            data.contentImages
+          );
+        }
+      }
+
+      function addResultCard(strategy, mainImage, allImages = null) {
+        const card = document.createElement("div");
+        card.className = "result-card";
+
+        card.innerHTML = `
+                <div class="strategy-header">
+                    <strong>${strategy}</strong>
+                </div>
+                <div class="image-container">
+                    <img src="${mainImage}" alt="Scraped image" onerror="this.src='https://via.placeholder.com/300x200?text=Failed+to+load'">
+                    ${
+                      allImages
+                        ? `
+                        <div class="debug-info">
+                            All URLs found:
+                            ${JSON.stringify(allImages, null, 2)}
+                        </div>
+                    `
+                        : ""
+                    }
+                </div>
+            `;
+
+        resultsElement.appendChild(card);
+      }
+
+      // Event listeners
+      scrapeButton.addEventListener("click", scrapeImages);
+      clearButton.addEventListener("click", () => {
+        resultsElement.innerHTML = "";
+        urlInput.value = "";
+      });
+
+      urlInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          scrapeImages();
+        }
+      });
+    </script>
+  </body>
+</html>
