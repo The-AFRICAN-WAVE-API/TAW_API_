@@ -1,5 +1,5 @@
 import { GoogleGenAI } from '@google/genai';
-import config from '../../../configuration/config.js';
+import { config } from '../../../configuration/config.js';
 
 const genai = new GoogleGenAI({
   apiKey: config.GEMINI_API_KEY,
@@ -56,7 +56,7 @@ export async function translate(text, targetLanguage) {
       }];
 
       const result = await genai.models.generateContent({
-        contents: [{parts}],
+        contents: [{ parts }],
         ...modelFeatures,
       });
 

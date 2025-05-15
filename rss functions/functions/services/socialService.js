@@ -3,9 +3,8 @@ import fetch from 'node-fetch';
 import { analyzeSentiment, analyzeEntities } from '../utils/analysis.js';
 import { getUniqueKey } from '../utils/helpers.js';
 import { detectLanguage } from '../utils/languages/languageDetection.js';
-import admin from '../configuration/firebase.js';
-const db = admin.firestore();
-import config from '../configuration/config.js';
+import { db, admin } from '../configuration/firebase.js';
+import { config } from '../configuration/config.js';
 
 /**
  * Fetches popular social media posts based on popular hashtags.
@@ -95,7 +94,7 @@ export async function processAndStoreSocialPosts() {
   let operationCount = 0;
 
   for (const post of posts) {
-    const contentForAnalysis = post.text || '';;
+    const contentForAnalysis = post.text || '';
     const sentiment = analyzeSentiment(contentForAnalysis);
     let entities = {};
     try {
@@ -133,7 +132,7 @@ export async function processAndStoreSocialPosts() {
       publicMetrics: post.public_metrics,
     };
     const docRef = db.collection('social_posts').doc(uniqueKey);
-    batch.set(docRef, docData, {merge: true});
+    batch.set(docRef, docData, { merge: true });
     operationCount++;
     if (operationCount >= MAX_BATCH_SIZE) {
       await batch.commit();
@@ -146,5 +145,5 @@ export async function processAndStoreSocialPosts() {
     await batch.commit();
     console.log('Final batch commit executed for social posts, remaining count:', operationCount);
   }
-  return {message: 'Social media posts ingested successfully', count: posts.length};
+  return { message: 'Social media posts ingested successfully', count: posts.length };
 }
