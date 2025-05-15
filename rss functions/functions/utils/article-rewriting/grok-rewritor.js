@@ -1,6 +1,6 @@
 import request from 'axios';
 import dotenv from 'dotenv';
-import config from '../../configuration/config.js';
+import { config } from '../../configuration/config.js';
 
 dotenv.config();
 
@@ -78,8 +78,8 @@ export async function getGrokResponse(title, link, targetLanguage) {
     method: 'post',
     maxBodyLength: Infinity,
     url: 'https://grok3api.com/api/chat/completions',
-    headers: { 
-      'Content-Type': 'application/json', 
+    headers: {
+      'Content-Type': 'application/json',
       'Authorization': `Bearer ${config.GROK3_API_KEY}`
     },
     data: data
