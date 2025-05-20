@@ -12,26 +12,40 @@ import {getUniqueKey} from '../utils/helpers.js';
 import admin from '../configuration/firebase.js';
 import {detectLanguage} from '../utils/languages/languageDetection.js';
 import striptags from 'striptags';
+import pusher from '../pusher.js';
+import {extract} from '@extractus/article-extractor';
 const db = admin.firestore();
 main
 
 /**
- * Attempts to extract an image URL from an RSS item using multiple strategies.
+ * Attempts to extract an image URL from article extractor
+ * fallback to RSS item if needed.
+ * @param {Object} extracted - Extracted article
  * @param {Object} item - RSS item
  * @return {string|null} - Image URL or null
  */
-function extractImageUrl(item) {
-  if (item.enclosure && item.enclosure.url) return item.enclosure.url;
-  const imgMatch = item.content?.match(/<img[^>]+src="([^">]+)"/i);
-  if (imgMatch && imgMatch[1]) return imgMatch[1];
-  return null;
+function extractImageUrl(extracted, item) {
+  if (extracted?.image) return extracted.image;
+  if (item.enclosure?.url) return item.enclosure.url;
+  const imgMatch = item.content?.match(/<img[^>]+src="([^"]+)"/i);
+  return imgMatch?.[1] || null;
 }
 
-/**
- * Strips HTML tags and gets the best available content for analysis.
- * @param {Object} item - RSS feed item
- * @return {string} - Cleaned text content
- */
+// list of breaking news keywords
+const breakingNewsKeywords = [
+  'breaking', 'alert', 'news', 'update', 'developing',
+  'just in', 'exclusive', 'urgent', 'evacuate', 'incident'
+];
+
+// Function to push breaking news alert via Pusher
+async function pushBreakingNewsAlert(title, content) {
+  const alert = { title, content, time: new Date().toISOString() };
+  pusher.trigger('news-channel', 'breaking-news', alert);
+  await db.collection('breaking_news').add({
+    ...alert,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+}
 function extractCleanContent(item) {
   const raw =
     item['content:encoded'] || item.content || item.description || item.contentSnippet || '';
@@ -69,16 +83,28 @@ export async function fetchAndStoreRssFeeds() {
         let geoLocation = null;
         if (item['geo:lat'] && item['geo:long']) {
           geoLocation = { lat: parseFloat(item['geo:lat']), lng: parseFloat(item['geo:long']) };
-        } else if (entities.places && entities.places.length > 0) {
+        } else if (entities.places?.length) {
           geoLocation = entities.places[0];
         }
 
-        const imageUrl = extractImageUrl(item); 
+        let extracted;
+        try {
+          extracted = await extract(item.link);
+        } catch (err) {
+          console.warn(`Extraction failed for ${item.link}:`, err.message);
+        }
+        const imageUrl = extractImageUrl(extracted, item);
         // <--updated image logic here
         // Language detection and translation (if needed)
         const detectedLanguage = detectLanguage(contentForAnalysis);
         // Duplicate checking: using the unique key as the Firestore doc ID prevents duplicate entries.
         const uniqueKey = getUniqueKey(item.title, item.link);
+
+        const contentText = (item.title + ' ' + (item.content || '') + ' ' + (item.description || '')).toLowerCase();
+        const isBreaking = breakingNewsKeywords.some(keyword => contentText.includes(keyword));
+        if (isBreaking) {
+          await pushBreakingNewsAlert(item.title, item.description || item.content || '');
+        }
         return {
           uniqueKey,
           data: {

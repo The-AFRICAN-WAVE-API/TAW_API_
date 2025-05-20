@@ -1,5 +1,7 @@
 {
   "dependencies": {
+    "@extractus/article-extractor": "^8.0.19",
+    "pusher": "^5.2.0",
     "striptags": "^3.2.0"
   }
 }
